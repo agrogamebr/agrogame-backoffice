@@ -14,7 +14,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-[98px] w-20 h-[calc(100vh-98px)] bg-white border-r border-gray-200 flex flex-col items-center py-[46px]">
+    <aside className="fixed left-0 top-[97.63px] w-20 h-[calc(100vh-97.63px)] bg-white flex flex-col items-center py-[46px]">
       <div className="w-[44px] flex flex-col gap-2 rounded-[15px] bg-[#F8F9FE] p-[2px]">
         {menuItems.map((item) => {
           const Icon = item.icon;
