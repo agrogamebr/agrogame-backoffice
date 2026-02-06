@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useActionState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { useActionState } from 'react';
 import Image from 'next/image';
 import { loginAction } from '@/app/actions/auth';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const [state, formAction, isPending] = useActionState(loginAction, {});
 
   return (
@@ -40,53 +40,22 @@ export default function LoginPage() {
           </div>
 
           <form action={formAction} className="space-y-6">
-            <div>
-              <label
-                htmlFor="identifier"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email, CPF ou CNPJ
-              </label>
-              <input
-                type="text"
-                id="identifier"
-                name="identifier"
-                placeholder="Insira seu email, CPF ou CNPJ"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white"
-                required
-              />
-            </div>
+            <Input
+              label="Email, CPF ou CNPJ"
+              id="identifier"
+              name="identifier"
+              placeholder="Insira seu email, CPF ou CNPJ"
+              required
+            />
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Senha
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  placeholder="Insira sua senha"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
+            <Input
+              label="Senha"
+              id="password"
+              name="password"
+              placeholder="Insira sua senha"
+              isPassword
+              required
+            />
 
             {state?.error && (
               <div className="p-3 bg-red-50 text-red-500 text-sm rounded-lg text-center">
@@ -94,13 +63,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
-              disabled={isPending}
-              className="w-full bg-[#007BFF] text-white font-medium py-3 px-4 rounded-lg hover:bg-[#0056b3] focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+              size="lg"
+              className="w-full"
+              isLoading={isPending}
             >
-              {isPending ? 'Entrando...' : 'Entrar'}
-            </button>
+              Entrar
+            </Button>
 
             {/* Link Esqueci a senha */}
             <div className="text-center">

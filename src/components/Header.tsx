@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, HelpCircle, User, LogOut } from 'lucide-react';
+import { Bell, HelpCircle, User, LogOut, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MobileMenuButton } from './MobileMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import LogoutModal from './LogoutModal';
+import { Input } from './ui/Input';
+import { Button } from './ui/Button';
 
 interface HeaderProps {
   onMenuClick: () => void;

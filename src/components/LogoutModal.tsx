@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import { Button } from './ui/Button';
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -34,18 +35,20 @@ export default function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalP
           </p>
 
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="secondary"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors cursor-pointer"
+              className="flex-1 rounded-xl"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="danger"
               onClick={onConfirm}
-              className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors cursor-pointer"
+              className="flex-1 rounded-xl"
             >
               Sair
-            </button>
+            </Button>
           </div>
         </div>
       </div>
