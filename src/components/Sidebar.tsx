@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const menuItems = [
-  { icon: LayoutDashboard, href: '/', label: 'Dashboard' },
+  { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
   { icon: User, href: '/users', label: 'Usuários' },
   { icon: FileText, href: '/documents', label: 'Documentos' },
 ];
