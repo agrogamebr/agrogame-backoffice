@@ -25,7 +25,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Container do formulário */}
       <div className="relative z-10 flex justify-center items-center min-h-screen px-4">
         <div className="w-[375px] h-[667px] bg-transparent p-6 flex flex-col justify-center">
           <div className="flex justify-center mb-6">
@@ -45,21 +44,23 @@ export default function LoginPage() {
               id="identifier"
               name="identifier"
               placeholder="Insira seu email, CPF ou CNPJ"
-              required
+              defaultValue={state?.identifier}
+              error={state?.errors?.identifier}
             />
 
             <Input
+              key={state?.errors?.password || state?.errors?.general}
               label="Senha"
               id="password"
               name="password"
               placeholder="Insira sua senha"
               isPassword
-              required
+              error={state?.errors?.password}
             />
 
-            {state?.error && (
+            {state?.errors?.general && (
               <div className="p-3 bg-red-50 text-red-500 text-sm rounded-lg text-center">
-                {state.error}
+                {state.errors.general}
               </div>
             )}
 

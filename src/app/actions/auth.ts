@@ -5,16 +5,31 @@ import { redirect } from 'next/navigation';
 import { login, LoginRequest, User } from '@/services/auth.service';
 
 export interface AuthState {
-  error?: string;
+  errors?: {
+    identifier?: string;
+    password?: string;
+    general?: string;
+  };
   success?: boolean;
+  identifier?: string;
 }
 
 export async function loginAction(prevState: AuthState, formData: FormData): Promise<AuthState> {
   const identifier = formData.get('identifier') as string;
   const password = formData.get('password') as string;
 
-  if (!identifier || !password) {
-    return { error: 'Por favor, preencha todos os campos.' };
+  const errors: AuthState['errors'] = {};
+
+  if (!identifier) {
+    errors.identifier = 'Informe seu login.';
+  }
+
+  if (!password) {
+    errors.password = 'Informe sua senha.';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { errors, identifier };
   }
 
   try {
@@ -22,16 +37,14 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
 
     const cookieStore = await cookies();
 
-    // Store the secure token (HttpOnly)
     cookieStore.set('token', response.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: response.expiresIn / 1000, // API returns ms, cookie expects seconds
+      maxAge: response.expiresIn / 1000,
       path: '/',
     });
 
-    // Store non-sensitive user info for the UI (Accessible by client)
     const userInfo: User = {
       userId: response.userId,
       email: response.email,
@@ -40,19 +53,23 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
     };
 
     cookieStore.set('user_info', JSON.stringify(userInfo), {
-      httpOnly: false, // Accessible to JS for Context
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: response.expiresIn / 1000,
       path: '/',
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return { error: 'Credenciais inválidas ou erro no servidor.' };
+    return {
+      errors: {
+        general: error.message || 'Credenciais inválidas ou erro no servidor.'
+      },
+      identifier
+    };
   }
 
-  // Redirect must be outside try/catch in Server Actions
   redirect('/dashboard');
 }
 

@@ -17,6 +17,13 @@ export interface LoginResponse extends User {
   expiresIn: number;
 }
 
+export interface ApiErrorResponse {
+  error: string;
+  message: string;
+  status: number;
+  timestamp: string;
+}
+
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
@@ -27,7 +34,16 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   });
 
   if (!response.ok) {
-    throw new Error('Falha na autenticação');
+    let errorMessage = 'Falha na autenticação';
+    try {
+      const errorData: ApiErrorResponse = await response.json();
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      }
+    } catch (e) {
+      console.error('Failed to parse error response', e);
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json();
