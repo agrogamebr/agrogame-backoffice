@@ -101,7 +101,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               {isProfileOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-10"
+                    className="fixed inset-0 z-10 cursor-pointer"
                     onClick={() => setIsProfileOpen(false)}
                   />
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">

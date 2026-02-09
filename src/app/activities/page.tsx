@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { ActivitiesFilter } from '@/components/activities/ActivitiesFilter';
 import { EmptyState } from '@/components/activities/EmptyState';
-import { ActivitiesList } from '@/components/activities/ActivitiesList';
-import { Activity, ActivityStatus } from '@/components/activities/ActivityCard';
+import { ActivitiesTable, Activity, ActivityStatus } from '@/components/activities/ActivitiesTable';
 import { listActivities } from '@/services/activity.service';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -22,6 +21,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   const size = Number(params?.size) || 10;
 
   let activities: Activity[] = [];
+  let totalElements = 0;
 
   try {
     const response = await listActivities(page, size);
@@ -30,51 +30,55 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       id: a.id.toString(),
       name: a.name,
       status: statusMapping[a.status] || 'Rascunho',
+      points: a.points,
+      createdAt: a.validFrom,
     }));
-  } catch (e: any) {
-    if (e.message === 'Token JWT ausente ou inválido' || e.message === 'Unauthorized' || e.status === 401) {
+
+    totalElements = response.totalElements;
+  } catch (e: unknown) {
+    const error = e as { message?: string; status?: number };
+    if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
       const cookieStore = await cookies();
       cookieStore.delete('token');
       cookieStore.delete('user_info');
-      redirect(`/login?error=${encodeURIComponent(e.message)}`);
+      redirect(`/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
     }
-    console.error(e);
+    console.error(error);
   }
 
   const hasActivities = activities.length > 0;
 
   return (
-    <div className="max-w-[1337px] mx-auto space-y-4 pt-[54px]">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-[20px]">
-        <h1 className="w-[288px] h-[44px] text-2xl font-bold text-gray-900 flex items-center">
+    <div className="max-w-7xl mx-auto space-y-4 pt-14">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <h1 className="w-72 h-11 text-2xl font-bold text-gray-900 flex items-center">
           Cadastro de atividades
         </h1>
 
         <div className="flex items-center gap-3">
           <Button
-            className="w-[227px] h-[44px] bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-[12px] rounded-[4px] p-[12px] text-sm font-medium"
+            className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium"
           >
             Cadastrar nova atividade
           </Button>
 
-          <div className="w-[187px] h-[44px]">
+          <div className="w-48 h-11">
             <ActivitiesFilter />
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center h-[54px] bg-white px-6 rounded-lg shadow-sm border border-gray-100">
-          <h2 className="text-lg font-medium text-gray-900">
-            Atividades
-          </h2>
-        </div>
-
-        {/* List / Empty State Card */}
+        {/* Table / Empty State */}
         {hasActivities ? (
-          <ActivitiesList activities={activities} />
+          <ActivitiesTable
+            activities={activities}
+            currentPage={page}
+            pageSize={size}
+            totalElements={totalElements}
+          />
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-[372px] flex items-center justify-center p-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">
             <EmptyState
               title="Sem atividades"
               description="Você ainda não tem nenhuma atividade cadastrada"

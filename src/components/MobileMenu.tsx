@@ -20,7 +20,7 @@ export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="block md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+      className="block md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
       aria-label="Menu"
     >
       <Menu className="w-6 h-6 text-gray-700" />
@@ -36,7 +36,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity cursor-pointer"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -55,7 +55,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Fechar menu"
           >
             <X className="w-6 h-6 text-gray-700" />
@@ -75,7 +75,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     href={item.href}
                     onClick={onClose}
                     className={`
-                      flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                      flex items-center gap-3 px-4 py-3 rounded-lg transition-all cursor-pointer
                       ${isActive
                         ? 'bg-blue-50 text-blue-600 font-medium'
                         : 'text-gray-700 hover:bg-gray-100'

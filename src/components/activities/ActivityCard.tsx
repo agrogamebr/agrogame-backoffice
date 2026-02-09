@@ -40,7 +40,7 @@ export function ActivityCard({ activity, onEdit, onDelete, onSend }: ActivityCar
       <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={() => onEdit?.(activity.id)}
-          className="p-2 transition-transform hover:scale-110"
+          className="p-2 transition-transform hover:scale-110 cursor-pointer"
           title="Editar"
         >
           <Pencil className="w-5 h-5 text-[#0B63E5]" />
@@ -48,7 +48,7 @@ export function ActivityCard({ activity, onEdit, onDelete, onSend }: ActivityCar
 
         <button
           onClick={() => onDelete?.(activity.id)}
-          className="p-2 transition-transform hover:scale-110"
+          className="p-2 transition-transform hover:scale-110 cursor-pointer"
           title="Excluir"
         >
           <Trash2 className="w-5 h-5 text-[#FF383C]" />
@@ -57,7 +57,7 @@ export function ActivityCard({ activity, onEdit, onDelete, onSend }: ActivityCar
         {showSendButton && (
           <button
             onClick={() => onSend?.(activity.id)}
-            className="p-2 transition-transform hover:scale-110"
+            className="p-2 transition-transform hover:scale-110 cursor-pointer"
             title="Enviar"
           >
             <Send className="w-5 h-5 text-[#00C448]" />

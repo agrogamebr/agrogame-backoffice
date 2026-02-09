@@ -77,7 +77,7 @@ export default function LoginPage() {
             <div className="text-center">
               <a
                 href="#"
-                className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 cursor-pointer"
               >
                 Esqueci a senha
               </a>
