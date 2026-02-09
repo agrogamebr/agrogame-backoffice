@@ -23,8 +23,5 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     headers,
   });
 
-  // Handle 401 Unauthorized globally if needed, though usually middleware handles access.
-  // if (response.status === 401) { ... }
-
   return response;
 }
