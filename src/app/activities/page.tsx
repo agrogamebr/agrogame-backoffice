@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
 import { ActivitiesFilter } from '@/components/activities/ActivitiesFilter';
 import { EmptyState } from '@/components/activities/EmptyState';
 import { ActivitiesTable, Activity, ActivityStatus } from '@/components/activities/ActivitiesTable';
@@ -53,18 +53,19 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   const hasActivities = activities.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 pt-14">
+    <div className="max-w-8xl mx-4 space-y-4 pt-14">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
-        <h1 className="w-72 h-11 text-2xl font-bold text-gray-900 flex items-center">
-          Cadastro de atividades
+        <h1 className="w-92 h-11 text-2xl font-bold text-gray-900 flex items-center">
+          Gerenciamento de atividades
         </h1>
 
         <div className="flex items-center gap-3">
-          <Button
-            className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium"
+          <Link
+            href="/activities/create"
+            className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium inline-flex items-center justify-center"
           >
             Cadastrar nova atividade
-          </Button>
+          </Link>
 
           <div className="w-48 h-11">
             <ActivitiesFilter />
