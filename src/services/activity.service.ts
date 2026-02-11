@@ -3,18 +3,18 @@ import { apiFetch } from '@/lib/api';
 export interface ActivityResponse {
   id: number;
   name: string;
-  companyId: number;
   description: string;
   points: number;
-  status: 'draft' | 'send' | 'deleted' | 'completed' | 'cancelled';
+  statusCode: 'draft' | 'send' | 'deleted' | 'completed' | 'cancelled';
   validFrom: string;
   validTo: string;
-  cropTypeIds: number[];
-  userActivityId: number | null;
-  userActivityStatus: string | null;
-  userActivityFarmId: number | null;
   thumbnailUrl: string | null;
   thumbnailGsutilUri: string | null;
+  userActivityId: number | null;
+  userActivityStatus: string | null;
+  producerId: number;
+  farmId: number;
+  productionUnitId: number | null;
 }
 
 export interface ActivityListResponse {
@@ -25,12 +25,13 @@ export interface ActivityListResponse {
   totalElements: number;
 }
 
-export async function listActivities(page: number = 1, size: number = 10): Promise<ActivityListResponse> {
-  const response = await apiFetch(`/api/activity/list?page=${page}&size=${size}`);
+export async function listActivities(page: number = 0, size: number = 10): Promise<ActivityListResponse> {
+  // Backend usa 0-based indexing, então enviamos a página como está
+  const response = await apiFetch(`/api/backoffice/activities/list?page=${page}&size=${size}`);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error: any = new Error(errorData.message || 'Erro ao listar atividades');
+    const error = new Error(errorData.message || 'Erro ao listar atividades') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }

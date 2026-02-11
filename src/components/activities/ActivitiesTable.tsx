@@ -21,6 +21,7 @@ interface ActivitiesTableProps {
   currentPage: number;
   pageSize: number;
   totalElements: number;
+  totalPages: number;
 }
 
 const statusBadgeVariant: Record<ActivityStatus, "enviado" | "rascunho" | "excluida" | "completado" | "cancelado"> = {
@@ -36,6 +37,7 @@ export function ActivitiesTable({
   currentPage,
   pageSize,
   totalElements,
+  totalPages,
 }: ActivitiesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,7 +51,7 @@ export function ActivitiesTable({
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('size', size.toString());
-    params.set('page', '1');
+    params.set('page', '0');
     router.push(`/activities?${params.toString()}`);
   };
 
@@ -144,6 +146,8 @@ export function ActivitiesTable({
         currentPage={currentPage}
         pageSize={pageSize}
         totalElements={totalElements}
+        totalPages={totalPages}
+        hasActivitiesOnPage={activities.length > 0}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
       />

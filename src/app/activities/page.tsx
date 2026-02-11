@@ -17,11 +17,12 @@ const statusMapping: Record<string, ActivityStatus> = {
 export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string }> }) {
 
   const params = await searchParams;
-  const page = Number(params?.page) || 1;
+  const page = Number(params?.page) || 0;
   const size = Number(params?.size) || 10;
 
   let activities: Activity[] = [];
   let totalElements = 0;
+  let totalPages = 0;
 
   try {
     const response = await listActivities(page, size);
@@ -29,12 +30,13 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
     activities = response.activities.map(a => ({
       id: a.id.toString(),
       name: a.name,
-      status: statusMapping[a.status] || 'Rascunho',
+      status: statusMapping[a.statusCode] || 'Rascunho',
       points: a.points,
       createdAt: a.validFrom,
     }));
 
     totalElements = response.totalElements;
+    totalPages = response.totalPages;
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };
     if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
@@ -76,6 +78,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
             currentPage={page}
             pageSize={size}
             totalElements={totalElements}
+            totalPages={totalPages}
           />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">

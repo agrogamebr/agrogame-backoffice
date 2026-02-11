@@ -7,6 +7,8 @@ interface PaginationProps {
   currentPage: number;
   pageSize: number;
   totalElements: number;
+  totalPages?: number;
+  hasActivitiesOnPage?: boolean;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   pageSizeOptions?: number[];
@@ -16,22 +18,27 @@ export function Pagination({
   currentPage,
   pageSize,
   totalElements,
+  totalPages: providedTotalPages,
+  hasActivitiesOnPage = true,
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [5, 10, 25, 50],
 }: PaginationProps) {
-  const totalPages = Math.ceil(totalElements / pageSize);
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalElements);
+  const calculatedTotalPages = Math.ceil(totalElements / pageSize);
+  const totalPages = providedTotalPages || calculatedTotalPages;
+  const startItem = currentPage * pageSize + 1;
+  const endItem = Math.min((currentPage + 1) * pageSize, totalElements);
 
   const handlePrevious = () => {
-    if (currentPage > 1) {
+    if (currentPage > 0) {
       onPageChange(currentPage - 1);
     }
   };
 
   const handleNext = () => {
-    if (currentPage < totalPages) {
+    // Segurança: não permite avançar se não há atividades na página atual
+    // ou se já está na última página
+    if (hasActivitiesOnPage && currentPage < totalPages - 1) {
       onPageChange(currentPage + 1);
     }
   };
@@ -69,10 +76,10 @@ export function Pagination({
       <div className="flex items-center gap-2">
         <button
           onClick={handlePrevious}
-          disabled={currentPage === 1}
+          disabled={currentPage === 0}
           className={cn(
             'p-2 rounded transition-colors',
-            currentPage === 1
+            currentPage === 0
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-50 cursor-pointer'
           )}
@@ -83,10 +90,10 @@ export function Pagination({
 
         <button
           onClick={handleNext}
-          disabled={currentPage >= totalPages || totalPages === 0}
+          disabled={!hasActivitiesOnPage || currentPage >= totalPages - 1 || totalPages === 0}
           className={cn(
             'p-2 rounded transition-colors',
-            currentPage >= totalPages || totalPages === 0
+            !hasActivitiesOnPage || currentPage >= totalPages - 1 || totalPages === 0
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-50 cursor-pointer'
           )}
