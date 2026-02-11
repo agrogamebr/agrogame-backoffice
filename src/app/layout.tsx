@@ -1,12 +1,11 @@
-'use client';
+
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import MobileMenu from "@/components/MobileMenu";
-import { useState } from "react";
+import { cookies } from 'next/headers';
+import { AuthProvider } from '@/contexts/AuthContext';
+import AppLayoutWrapper from '@/components/AppLayoutWrapper';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,12 +17,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Read user info from cookies server-side
+  const cookieStore = await cookies();
+  const userInfoCookie = cookieStore.get('user_info');
+  let initialUser = null;
+
+  if (userInfoCookie) {
+    try {
+      initialUser = JSON.parse(userInfoCookie.value);
+    } catch (e) {
+      console.error('Failed to parse user cookie', e);
+    }
+  }
 
   return (
     <html lang="pt-BR">
@@ -34,16 +44,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <Sidebar />
-        <MobileMenu
-          isOpen={isMobileMenuOpen}
-          onClose={() => setIsMobileMenuOpen(false)}
-        />
-        <main className="pt-14 md:pt-16 lg:pt-20 md:ml-20 px-4 md:px-6 lg:px-8">
-          {children}
-        </main>
+        <AuthProvider initialUser={initialUser}>
+          <AppLayoutWrapper>{children}</AppLayoutWrapper>
+        </AuthProvider>
       </body>
     </html>
   );
 }
+
+// Client Component wrapper for conditional rendering of Header/Sidebar
+// We need this because accessing hook usePathname in RootLayout (Server Component) is tricky inside the body directly if we keep RootLayout as Server Component for cookies.
+// Alternatively, we can move the conditional logic to a new client component.
+

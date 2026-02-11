@@ -1,13 +1,13 @@
 'use client';
 
-import { LayoutDashboard, User, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const menuItems = [
-  { icon: LayoutDashboard, href: '/', label: 'Dashboard' },
-  { icon: User, href: '/users', label: 'Usuários' },
-  { icon: FileText, href: '/documents', label: 'Documentos' },
+  { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
+  { icon: Users, href: '/users', label: 'Usuários' },
+  { icon: ListTodo, href: '/activities', label: 'Atividades' },
 ];
 
 export default function Sidebar() {
@@ -25,7 +25,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`
-                flex items-center justify-center w-10 h-10 rounded-[13px] transition-all
+                flex items-center justify-center w-10 h-10 rounded-[13px] transition-all cursor-pointer
                 ${isActive
                   ? 'bg-white border border-[#F9FAFC] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] text-gray-400'
                   : 'bg-transparent text-blue-500 hover:bg-blue-50'
