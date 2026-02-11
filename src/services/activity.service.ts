@@ -26,7 +26,6 @@ export interface ActivityListResponse {
 }
 
 export async function listActivities(page: number = 0, size: number = 10): Promise<ActivityListResponse> {
-  // Backend usa 0-based indexing, então enviamos a página como está
   const response = await apiFetch(`/api/backoffice/activities/list?page=${page}&size=${size}`);
 
   if (!response.ok) {
