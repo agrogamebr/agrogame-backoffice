@@ -5,7 +5,7 @@ export interface ActivityResponse {
   name: string;
   description: string;
   points: number;
-  statusCode: 'draft' | 'send' | 'deleted' | 'completed' | 'cancelled';
+  statusCode: 'draft' | 'send' | 'deleted' | 'completed' | 'canceled';
   validFrom: string;
   validTo: string;
   thumbnailUrl: string | null;

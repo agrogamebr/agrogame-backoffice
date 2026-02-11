@@ -11,7 +11,7 @@ const statusMapping: Record<string, ActivityStatus> = {
   'send': 'Enviado',
   'deleted': 'Excluída',
   'completed': 'Completado',
-  'cancelled': 'Cancelado',
+  'canceled': 'Cancelado',
 };
 
 export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string }> }) {
@@ -31,8 +31,10 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       id: a.id.toString(),
       name: a.name,
       status: statusMapping[a.statusCode] || 'Rascunho',
+      statusCode: a.statusCode,
       points: a.points,
       createdAt: a.validFrom,
+      rowKey: `${a.id}-${a.userActivityId ?? 'no-user'}-${a.farmId ?? 'no-farm'}`,
     }));
 
     totalElements = response.totalElements;
