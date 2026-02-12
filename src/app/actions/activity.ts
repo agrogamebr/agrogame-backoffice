@@ -1,7 +1,7 @@
 'use server';
 
 import { apiFetch } from '@/lib/api';
-import { createActivity } from '@/services/activity-create.service';
+import { createActivity, updateActivity } from '@/services/activity-create.service';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -44,6 +44,24 @@ export async function saveActivityDraft(formData: FormData) {
 export async function saveAndSendActivity(formData: FormData) {
   formData.set('sendNow', 'true');
   await createActivityFromForm(formData);
+}
+
+export async function saveActivityDraftEdit(formData: FormData) {
+  const activityId = formData.get('activityId') as string;
+  if (!activityId) {
+    throw new Error('ID da atividade não fornecido');
+  }
+  formData.set('sendNow', 'false');
+  await updateActivityFromForm(parseInt(activityId, 10), formData);
+}
+
+export async function saveAndSendActivityEdit(formData: FormData) {
+  const activityId = formData.get('activityId') as string;
+  if (!activityId) {
+    throw new Error('ID da atividade não fornecido');
+  }
+  formData.set('sendNow', 'true');
+  await updateActivityFromForm(parseInt(activityId, 10), formData);
 }
 
 /**
@@ -215,6 +233,112 @@ async function createActivityFromForm(formData: FormData) {
     // Handle validation errors
     if ((error as Record<string, unknown>).isValidationError === true) {
       console.log('⚠️ [Create Activity] Re-throwing validation error to client...');
+      try {
+        const validationErrors = JSON.parse(error.message || '{}');
+        const validationError = new Error(JSON.stringify(validationErrors)) as unknown as { isValidationError?: boolean };
+        (validationError as Record<string, unknown>).isValidationError = true;
+        throw validationError;
+      } catch {
+        throw error;
+      }
+    }
+
+    // Handle auth errors
+    if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
+      const cookieStore = await cookies();
+      cookieStore.delete('token');
+      cookieStore.delete('user_info');
+      redirect(`/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
+    }
+
+    throw error;
+  }
+}
+
+async function updateActivityFromForm(activityId: number, formData: FormData) {
+  try {
+    console.log('📝 [Update Activity] Starting form submission...');
+    
+    // Log all form data for debugging
+    console.log('🔍 [Update Activity] FormData contents at start:');
+    const formDataLog: Record<string, unknown> = {};
+    formData.forEach((value, key) => {
+      if (value instanceof File) {
+        formDataLog[key] = `File: ${value.name} (${value.size} bytes, type: ${value.type})`;
+      } else {
+        if (formDataLog[key]) {
+          if (Array.isArray(formDataLog[key])) {
+            (formDataLog[key] as unknown[]).push(value);
+          } else {
+            formDataLog[key] = [formDataLog[key], value];
+          }
+        } else {
+          formDataLog[key] = value;
+        }
+      }
+    });
+    console.log(JSON.stringify(formDataLog, null, 2));
+    
+    // Validate form data
+    const validation = validateActivityForm(formData);
+    if (!validation.valid) {
+      console.log('❌ [Update Activity] Validation failed:', validation.errors);
+      const error = new Error(JSON.stringify(validation.errors)) as Error & { isValidationError?: boolean };
+      (error as unknown as Record<string, unknown>).isValidationError = true;
+      throw error;
+    }
+    
+    console.log('✅ [Update Activity] Validation passed, proceeding with API request...');
+
+    const sendNow = formData.get('sendNow') === 'true';
+
+    const name = formData.get('activityName') as string;
+    const description = formData.get('activityDescription') as string;
+    const points = parseInt(formData.get('activityPoints') as string, 10);
+    const validFrom = formData.get('startDate') as string;
+    const validTo = formData.get('endDate') as string;
+    const thumbnail = formData.get('activityImage') as File | null;
+
+    const cropTypeIds = formData.getAll('cropTypeIds').map((id) => parseInt(id as string, 10));
+    const farmIds = formData.getAll('farmIds').map((id) => parseInt(id as string, 10));
+    const productionUnitIds = formData.getAll('productionUnitIds').map((id) => parseInt(id as string, 10));
+
+    console.log('🖼️ [Update Activity] Extracted image file:', {
+      exists: !!thumbnail,
+      type: thumbnail instanceof File ? 'File' : typeof thumbnail,
+      size: thumbnail instanceof File ? thumbnail.size : 'N/A',
+      name: thumbnail instanceof File ? thumbnail.name : 'N/A',
+    });
+
+    await updateActivity(activityId, {
+      name,
+      description,
+      points,
+      validFrom,
+      validTo,
+      cropTypeIds,
+      thumbnail: thumbnail && thumbnail.size > 0 ? thumbnail : undefined,
+      farmIds: farmIds.length > 0 ? farmIds : undefined,
+      productionUnitIds: productionUnitIds.length > 0 ? productionUnitIds : undefined,
+      sendNow,
+    });
+
+    console.log('🎉 [Update Activity] Activity updated successfully!');
+    redirect('/activities?success=Atividade atualizada com sucesso');
+  } catch (e: unknown) {
+    const error = e as { message?: string; status?: number; isValidationError?: boolean };
+
+    // Log API errors for debugging
+    console.error('❌ [Update Activity] Error details:', {
+      message: error.message,
+      status: error.status,
+      isValidationError: (error as Record<string, unknown>).isValidationError,
+      fullError: error,
+    });
+
+    // Handle validation errors
+    if ((error as Record<string, unknown>).isValidationError === true) {
+      console.log('⚠️ [Update Activity] Re-throwing validation error to client...');
       try {
         const validationErrors = JSON.parse(error.message || '{}');
         const validationError = new Error(JSON.stringify(validationErrors)) as unknown as { isValidationError?: boolean };

@@ -8,6 +8,7 @@ interface ActivityImageUploadProps {
   helperText?: string;
   name: string;
   accept?: string;
+  initialImageUrl?: string;
 }
 
 export function ActivityImageUpload({
@@ -15,18 +16,21 @@ export function ActivityImageUpload({
   helperText,
   name,
   accept = 'image/png,image/jpeg',
+  initialImageUrl,
 }: ActivityImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      // Only revoke blob URLs, not external URLs
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
       }
     };
-  }, [previewUrl]);
+  }, [blobUrl]);
 
   const handleSelectFile = () => {
     inputRef.current?.click();
@@ -37,6 +41,7 @@ export function ActivityImageUpload({
     if (!file) {
       console.log('📸 [ActivityImageUpload] No file selected');
       setPreviewUrl(null);
+      setBlobUrl(null);
       setFileName(null);
       return;
     }
@@ -48,13 +53,15 @@ export function ActivityImageUpload({
       actualFile: !!file 
     });
 
-    const nextPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrl((current) => {
-      if (current) {
-        URL.revokeObjectURL(current);
-      }
-      return nextPreviewUrl;
-    });
+    const nextBlobUrl = URL.createObjectURL(file);
+    
+    // Revoke previous blob URL if it exists
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+    }
+    
+    setPreviewUrl(nextBlobUrl);
+    setBlobUrl(nextBlobUrl);
     setFileName(file.name);
   };
 

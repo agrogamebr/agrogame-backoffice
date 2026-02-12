@@ -66,8 +66,7 @@ export function ActivitiesTable({
   };
 
   const handleEdit = (id: string) => {
-    console.log('Edit', id);
-    // TODO: Implement navigation or modal logic
+    router.push(`/activities/create?id=${id}`);
   };
 
   const handleCancelClick = (activity: Activity) => {

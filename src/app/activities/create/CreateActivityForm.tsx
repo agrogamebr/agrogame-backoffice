@@ -5,13 +5,16 @@ import { useActionState, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { ActivityImageUpload } from '@/components/activities/ActivityImageUpload';
 import { SelectableCheckboxList } from '@/components/activities/SelectableCheckboxList';
-import { saveActivityDraft, saveAndSendActivity } from '@/app/actions/activity';
+import { saveActivityDraft, saveAndSendActivity, saveActivityDraftEdit, saveAndSendActivityEdit } from '@/app/actions/activity';
 import { useToast } from '@/components/ui/Toast';
+import { ActivityDetail } from '@/services/activity-create.service';
 
 interface CreateActivityFormProps {
   cropTypes: { id: number; label: string }[];
   farms: { id: number; label: string }[];
   productionUnits: { id: number; label: string }[];
+  isEditing?: boolean;
+  initialActivity?: ActivityDetail | null;
 }
 
 function ErrorAlert({ errors }: { errors: Record<string, string> | null }) {
@@ -77,13 +80,19 @@ export function CreateActivityForm({
   cropTypes,
   farms,
   productionUnits,
+  isEditing = false,
+  initialActivity = null,
 }: CreateActivityFormProps) {
   const { addToast } = useToast();
+
+  // Determine which action to use based on mode
+  const draftAction = isEditing ? saveActivityDraftEdit : saveActivityDraft;
+  const sendAction = isEditing ? saveAndSendActivityEdit : saveAndSendActivity;
 
   const [stateDraft, formActionDraft, isPendingDraft] = useActionState<FormState | undefined, FormData>(
     async (_, formData) => {
       try {
-        await saveActivityDraft(formData);
+        await draftAction(formData);
       } catch (error: unknown) {
         const err = error as Error & { message?: string };
         if (err?.message) {
@@ -123,7 +132,7 @@ export function CreateActivityForm({
   const [stateSend, formActionSend, isPendingSend] = useActionState<FormState | undefined, FormData>(
     async (_, formData) => {
       try {
-        await saveAndSendActivity(formData);
+        await sendAction(formData);
       } catch (error: unknown) {
         const err = error as Error & { message?: string };
         if (err?.message) {
@@ -172,6 +181,15 @@ export function CreateActivityForm({
     }
   }, [errors, addToast]);
 
+  const pageTitle = isEditing ? 'Editar atividade' : 'Criar atividade';
+
+  // Set up default values for form fields
+  const defaultName = previousValues?.name || initialActivity?.name || '';
+  const defaultDescription = previousValues?.description || initialActivity?.description || '';
+  const defaultPoints = previousValues?.points || initialActivity?.points?.toString() || '';
+  const defaultValidFrom = previousValues?.validFrom || initialActivity?.validFrom || '';
+  const defaultValidTo = previousValues?.validTo || initialActivity?.validTo || '';
+
   return (
     <div className="max-w-8xl mx-4 space-y-6 pt-10 pb-16">
       <div className="flex flex-col gap-2">
@@ -180,20 +198,25 @@ export function CreateActivityForm({
             Gerenciamento de atividades
           </Link>
           <span className="text-gray-400">&gt;</span>
-          <span className="font-semibold text-gray-900">Criar atividade</span>
+          <span className="font-semibold text-gray-900">{pageTitle}</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Criar atividade</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
       </div>
 
       <ErrorAlert errors={errors || null} />
 
       <form className="space-y-6">
+        {isEditing && initialActivity && (
+          <input type="hidden" name="activityId" value={initialActivity.id} />
+        )}
+
         <SectionCard title="Informações da atividade">
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1.2fr_180px] gap-6 items-start">
             <ActivityImageUpload
               label="Imagem da atividade"
               helperText="A imagem deve ser em png 180x180px"
               name="activityImage"
+              initialImageUrl={initialActivity?.thumbnailUrl}
             />
 
             <Input 
@@ -205,7 +228,7 @@ export function CreateActivityForm({
               }
               placeholder="Desmatamento - Corte Raso"
               name="activityName"
-              defaultValue={previousValues?.name}
+              defaultValue={defaultName}
               error={errors?.activityName}
               required
             />
@@ -219,7 +242,7 @@ export function CreateActivityForm({
                 name="activityDescription"
                 rows={4}
                 placeholder="Descreva a atividade"
-                defaultValue={previousValues?.description}
+                defaultValue={defaultDescription}
                 required
                 aria-invalid={!!errors?.activityDescription}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${
@@ -241,7 +264,7 @@ export function CreateActivityForm({
               type="number" 
               placeholder="0"
               name="activityPoints"
-              defaultValue={previousValues?.points}
+              defaultValue={defaultPoints}
               error={errors?.activityPoints}
               required
             />
@@ -260,6 +283,7 @@ export function CreateActivityForm({
                 filterPlaceholder="Filtrar cultura"
                 items={cropTypes}
                 inputName="cropTypeIds"
+                defaultSelectedIds={initialActivity?.cropTypeIds}
               />
               {errors?.cropTypeIds && (
                 <p className="mt-2 text-sm text-red-600">{errors.cropTypeIds}</p>
@@ -271,6 +295,7 @@ export function CreateActivityForm({
               filterPlaceholder="Filtrar fazendas"
               items={farms}
               inputName="farmIds"
+              defaultSelectedIds={initialActivity?.farmIds}
             />
 
             <SelectableCheckboxList
@@ -278,6 +303,7 @@ export function CreateActivityForm({
               filterPlaceholder="Filtrar unidades"
               items={productionUnits}
               inputName="productionUnitIds"
+              defaultSelectedIds={initialActivity?.productionUnitIds}
             />
 
             <div className="space-y-6">
@@ -291,7 +317,7 @@ export function CreateActivityForm({
                     </span>
                   }
                   name="startDate"
-                  defaultValue={previousValues?.validFrom}
+                  defaultValue={defaultValidFrom}
                   error={errors?.startDate}
                   required
                 />
@@ -307,7 +333,7 @@ export function CreateActivityForm({
                     </span>
                   }
                   name="endDate"
-                  defaultValue={previousValues?.validTo}
+                  defaultValue={defaultValidTo}
                   error={errors?.endDate}
                   required
                 />

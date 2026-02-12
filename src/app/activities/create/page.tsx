@@ -1,14 +1,22 @@
 'use server';
 
 import { CreateActivityForm } from './CreateActivityForm';
-import { listCropTypes, listFarms, listProductionUnits } from '@/services/activity-create.service';
+import { listCropTypes, listFarms, listProductionUnits, getActivityById, ActivityDetail } from '@/services/activity-create.service';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export default async function CreateActivityPage() {
+export default async function CreateActivityPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ id?: string }> 
+}) {
+  const params = await searchParams;
+  const activityId = params.id ? parseInt(params.id, 10) : null;
+  
   let cropTypes: { id: number; label: string }[] = [];
   let farms: { id: number; label: string }[] = [];
   let productionUnits: { id: number; label: string }[] = [];
+  let initialActivity: ActivityDetail | null = null;
 
   try {
     const [cropTypesResponse, farmsResponse, productionUnitsResponse] = await Promise.all([
@@ -31,6 +39,11 @@ export default async function CreateActivityPage() {
       id: item.id,
       label: item.name,
     }));
+
+    // If editing, fetch the activity data
+    if (activityId) {
+      initialActivity = await getActivityById(activityId);
+    }
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };
     if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
@@ -47,6 +60,8 @@ export default async function CreateActivityPage() {
       cropTypes={cropTypes}
       farms={farms}
       productionUnits={productionUnits}
+      isEditing={!!activityId}
+      initialActivity={initialActivity}
     />
   );
 }

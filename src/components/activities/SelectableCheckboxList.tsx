@@ -12,6 +12,7 @@ interface SelectableCheckboxListProps {
   filterPlaceholder: string;
   items: SelectableCheckboxItem[];
   inputName: string;
+  defaultSelectedIds?: number[];
 }
 
 export function SelectableCheckboxList({
@@ -19,10 +20,16 @@ export function SelectableCheckboxList({
   filterPlaceholder,
   items,
   inputName,
+  defaultSelectedIds = [],
 }: SelectableCheckboxListProps) {
   const [filter, setFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
-    () => new Set(items.map((item) => item.id))
+    () => {
+      if (defaultSelectedIds.length > 0) {
+        return new Set(defaultSelectedIds);
+      }
+      return new Set(items.map((item) => item.id));
+    }
   );
 
   const filteredItems = useMemo(() => {
