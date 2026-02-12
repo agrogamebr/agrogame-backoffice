@@ -3,6 +3,7 @@ import { ActivitiesFilter } from '@/components/activities/ActivitiesFilter';
 import { EmptyState } from '@/components/activities/EmptyState';
 import { ActivitiesTable, Activity, ActivityStatus } from '@/components/activities/ActivitiesTable';
 import { listActivities } from '@/services/activity.service';
+import { listCropTypes, listFarms, listProductionUnits } from '@/services/activity-create.service';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -14,20 +15,54 @@ const statusMapping: Record<string, ActivityStatus> = {
   'canceled': 'Cancelado',
 };
 
-export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string }> }) {
+export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; status?: string; cropTypeId?: string; farmId?: string; productionUnitId?: string; startDate?: string; endDate?: string }> }) {
 
   const params = await searchParams;
   const page = Number(params?.page) || 0;
   const size = Number(params?.size) || 10;
 
+  // Build filters object from query params
+  const filters = {
+    status: params?.status,
+    cropTypeId: params?.cropTypeId,
+    farmId: params?.farmId,
+    productionUnitId: params?.productionUnitId,
+    startDate: params?.startDate,
+    endDate: params?.endDate,
+  };
+
   let activities: Activity[] = [];
   let totalElements = 0;
   let totalPages = 0;
+  let cropTypes: { id: number; name: string }[] = [];
+  let farms: { id: number; name: string }[] = [];
+  let productionUnits: { id: number; name: string }[] = [];
 
   try {
-    const response = await listActivities(page, size);
+    // Load filter options in parallel
+    const [cropTypesResponse, farmsResponse, productionUnitsResponse, activitiesResponse] = await Promise.all([
+      listCropTypes(),
+      listFarms(),
+      listProductionUnits(),
+      listActivities(page, size, filters),
+    ]);
 
-    activities = response.activities.map(a => ({
+    cropTypes = cropTypesResponse.map((item) => ({
+      id: item.id,
+      name: item.name,
+    }));
+
+    farms = farmsResponse.map((item) => ({
+      id: item.id,
+      name: item.name,
+    }));
+
+    productionUnits = productionUnitsResponse.map((item) => ({
+      id: item.id,
+      name: item.name,
+    }));
+
+    activities = activitiesResponse.activities.map(a => ({
       id: a.id.toString(),
       name: a.name,
       status: statusMapping[a.statusCode] || 'Rascunho',
@@ -37,8 +72,8 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       rowKey: `${a.id}-${a.userActivityId ?? 'no-user'}-${a.farmId ?? 'no-farm'}`,
     }));
 
-    totalElements = response.totalElements;
-    totalPages = response.totalPages;
+    totalElements = activitiesResponse.totalElements;
+    totalPages = activitiesResponse.totalPages;
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };
     if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
@@ -68,7 +103,11 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
           </Link>
 
           <div className="w-48 h-11">
-            <ActivitiesFilter />
+            <ActivitiesFilter 
+              cropTypes={cropTypes}
+              farms={farms}
+              productionUnits={productionUnits}
+            />
           </div>
         </div>
       </div>
