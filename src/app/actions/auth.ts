@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { login, LoginRequest, User } from '@/services/auth.service';
+import { login, User } from '@/services/auth.service';
 
 export interface AuthState {
   errors?: {
@@ -60,11 +60,12 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
       path: '/',
     });
 
-  } catch (error: any) {
-    console.error('Login error:', error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Login error:', err);
     return {
       errors: {
-        general: error.message || 'Credenciais inválidas ou erro no servidor.'
+        general: err.message || 'Credenciais inválidas ou erro no servidor.'
       },
       identifier
     };

@@ -18,6 +18,7 @@ export function ActivityImageUpload({
 }: ActivityImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -34,9 +35,18 @@ export function ActivityImageUpload({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
+      console.log('📸 [ActivityImageUpload] No file selected');
       setPreviewUrl(null);
+      setFileName(null);
       return;
     }
+
+    console.log('📸 [ActivityImageUpload] File selected:', { 
+      name: file.name, 
+      size: file.size, 
+      type: file.type,
+      actualFile: !!file 
+    });
 
     const nextPreviewUrl = URL.createObjectURL(file);
     setPreviewUrl((current) => {
@@ -45,6 +55,7 @@ export function ActivityImageUpload({
       }
       return nextPreviewUrl;
     });
+    setFileName(file.name);
   };
 
   return (
@@ -53,7 +64,7 @@ export function ActivityImageUpload({
       <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
         {previewUrl ? (
           <div className="space-y-3">
-            <div className="relative w-full aspect-square max-w-[180px] mx-auto overflow-hidden rounded-lg bg-white">
+            <div className="relative w-full aspect-square max-w-45 mx-auto overflow-hidden rounded-lg bg-white">
               <Image
                 src={previewUrl}
                 alt="Preview da atividade"
@@ -61,6 +72,11 @@ export function ActivityImageUpload({
                 className="object-cover"
               />
             </div>
+            {fileName && (
+              <p className="text-xs text-gray-500">
+                {fileName}
+              </p>
+            )}
             <button
               type="button"
               onClick={handleSelectFile}
@@ -85,6 +101,7 @@ export function ActivityImageUpload({
           accept={accept}
           onChange={handleFileChange}
           className="hidden"
+          aria-label={label}
         />
       </div>
       {helperText && <p className="text-xs text-gray-500">{helperText}</p>}

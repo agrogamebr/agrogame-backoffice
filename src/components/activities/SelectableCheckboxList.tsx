@@ -8,7 +8,7 @@ export interface SelectableCheckboxItem {
 }
 
 interface SelectableCheckboxListProps {
-  title: string;
+  title: string | React.ReactNode;
   filterPlaceholder: string;
   items: SelectableCheckboxItem[];
   inputName: string;
@@ -82,7 +82,7 @@ export function SelectableCheckboxList({
           <label key={item.id} className="flex items-center gap-3 text-sm text-gray-700">
             <input
               type="checkbox"
-              name={`${inputName}[]`}
+              name={inputName}
               value={item.id}
               checked={selectedIds.has(item.id)}
               onChange={() => handleToggleItem(item.id)}

@@ -103,12 +103,16 @@ export function ActivitiesTable({
   };
 
   const showSendButton = (statusCode: ActivityStatusCode) => {
-    return statusCode !== 'send' && statusCode !== 'completed';
+    return statusCode !== 'send' && statusCode !== 'completed' && statusCode !== 'canceled';
   };
 
   const showCancelButton = (statusCode: ActivityStatusCode) => {
     return statusCode === 'draft';
   };
+
+  const showEditButton = (statusCode: ActivityStatusCode) => {
+    return statusCode !== 'canceled';
+  }
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm">
@@ -141,13 +145,15 @@ export function ActivitiesTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => handleEdit(activity.id)}
-                    className="p-2 transition-transform hover:scale-110 cursor-pointer"
-                    title="Editar"
-                  >
-                    <Pencil className="w-4 h-4 text-[#0B63E5]" />
-                  </button>
+                  {showEditButton(activity.statusCode) && (
+                    <button
+                      onClick={() => handleEdit(activity.id)}
+                      className="p-2 transition-transform hover:scale-110 cursor-pointer"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                    </button>
+                  )}
 
                   {showCancelButton(activity.statusCode) && (
                     <button
