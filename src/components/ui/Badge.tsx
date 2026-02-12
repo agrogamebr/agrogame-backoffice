@@ -12,6 +12,9 @@ const badgeVariants = cva(
         excluida: 'bg-[#C8272A]',
         completado: 'bg-[#0B63E5]',
         cancelado: 'bg-[#FFCC00]',
+        pendente: 'bg-[#635DFF]',
+        aprovado: 'bg-[#25A259]',
+        rejeitado: 'bg-[#FF383C]'
       },
     },
     defaultVariants: {

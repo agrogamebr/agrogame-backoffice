@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { login, LoginRequest, User } from '@/services/auth.service';
+import { login, User } from '@/services/auth.service';
 
 export interface AuthState {
   errors?: {
