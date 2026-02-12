@@ -46,33 +46,13 @@ export default async function CompletedActivitiesPage({
     <div className="max-w-8xl mx-4 space-y-4 pt-14">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
         <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <Link
-              href="/activities"
-              className="font-semibold text-gray-700 hover:text-[#0B63E5]"
-            >
-              Gerenciamento de atividades
-            </Link>
-            <span className="text-gray-400">&gt;</span>
-            <span className="font-semibold text-gray-900">Atividades Realizadas</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900">
             Atividades Realizadas
           </h1>
         </div>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/activities"
-            className="h-11 bg-gray-200 hover:bg-gray-300 text-gray-700 gap-3 rounded-lg px-4 py-3 text-sm font-medium inline-flex items-center justify-center"
-          >
-            ← Voltar
-          </Link>
-        </div>
       </div>
 
       <div className="space-y-4">
-        {/* Table / Empty State */}
         {hasSubmissions ? (
           <CompletedActivitiesTable
             submissions={submissions}
