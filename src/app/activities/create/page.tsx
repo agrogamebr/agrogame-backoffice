@@ -43,6 +43,10 @@ export default async function CreateActivityPage({
     // If editing, fetch the activity data
     if (activityId) {
       initialActivity = await getActivityById(activityId);
+      console.log('📄 [CreateActivityPage] Activity fetched:', { 
+        activityId, 
+        thumbnailGsutilUri: initialActivity?.thumbnailGsutilUri 
+      });
     }
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };

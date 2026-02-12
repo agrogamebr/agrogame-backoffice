@@ -8,7 +8,7 @@ interface ActivityImageUploadProps {
   helperText?: string;
   name: string;
   accept?: string;
-  initialImageUrl?: string;
+  initialImageGsUri?: string;
 }
 
 export function ActivityImageUpload({
@@ -16,10 +16,18 @@ export function ActivityImageUpload({
   helperText,
   name,
   accept = 'image/png,image/jpeg',
-  initialImageUrl,
+  initialImageGsUri,
 }: ActivityImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
+  
+  // Build proxy URL if initialImageGsUri is provided
+  const initialPreviewUrl = initialImageGsUri 
+    ? `/api/files/proxy?url=${encodeURIComponent(initialImageGsUri)}`
+    : null;
+  
+  console.log('📸 [ActivityImageUpload] Props:', { initialImageGsUri, initialPreviewUrl });
+  
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl);
   const [fileName, setFileName] = useState<string | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
@@ -76,6 +84,7 @@ export function ActivityImageUpload({
                 src={previewUrl}
                 alt="Preview da atividade"
                 fill
+                unoptimized={previewUrl.startsWith('/api/')}
                 className="object-cover"
               />
             </div>

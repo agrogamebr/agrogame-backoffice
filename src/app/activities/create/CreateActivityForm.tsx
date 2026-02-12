@@ -216,7 +216,7 @@ export function CreateActivityForm({
               label="Imagem da atividade"
               helperText="A imagem deve ser em png 180x180px"
               name="activityImage"
-              initialImageUrl={initialActivity?.thumbnailUrl}
+              initialImageGsUri={initialActivity?.thumbnailGsutilUri}
             />
 
             <Input 
