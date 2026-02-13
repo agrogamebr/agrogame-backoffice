@@ -2,11 +2,50 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, FileText, File } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
-import { ActivitySubmission } from '@/services/activity-submissions.service';
+import { ActivitySubmission, SubmissionFile } from '@/services/activity-submissions.service';
+import { getFileUrl, isImageFile, getFileExtension } from '@/lib/file-utils';
+
+interface FilePreviewProps {
+  file: SubmissionFile;
+  className?: string;
+}
+
+const FilePreview = ({ file, className = '' }: FilePreviewProps) => {
+  const isImage = isImageFile(file.fileName);
+  const fileUrl = getFileUrl(file.gsutilUri);
+
+  if (isImage) {
+    return (
+      <img
+        src={fileUrl}
+        alt={file.fileName}
+        className={`w-full h-full object-cover ${className}`}
+        onError={(e) => {
+          const target = e.currentTarget as HTMLImageElement;
+          target.onerror = null;
+          target.style.display = 'none';
+          target.parentElement?.classList.add('bg-gray-100', 'flex', 'items-center', 'justify-center');
+          if (target.parentElement) {
+            target.parentElement.innerHTML = '<span class="text-xs text-red-400">Erro</span>';
+          }
+        }}
+      />
+    );
+  }
+
+  const extension = getFileExtension(file.fileName);
+
+  return (
+    <div className={`w-full h-full flex flex-col items-center justify-center bg-gray-50 ${className}`}>
+      <FileText className="w-8 h-8 text-gray-400 mb-1" />
+      <span className="text-xs font-medium text-gray-500">{extension}</span>
+    </div>
+  );
+};
 
 interface CompletedActivitiesTableProps {
   submissions: ActivitySubmission[];
@@ -32,6 +71,8 @@ export function CompletedActivitiesTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSubmission, setSelectedSubmission] = useState<ActivitySubmission | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [justification, setJustification] = useState<string>('');
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -44,6 +85,34 @@ export function CompletedActivitiesTable({
     params.set('size', newSize.toString());
     params.set('page', '0');
     router.push(`/completed-activities?${params.toString()}`);
+  };
+
+  const handleOpenModal = (submission: ActivitySubmission) => {
+    setSelectedSubmission(submission);
+    setSelectedStatus(submission.status);
+    setJustification('');
+  };
+
+  const handleCloseModal = () => {
+    setSelectedSubmission(null);
+    setSelectedStatus('');
+    setJustification('');
+  };
+
+  const handleSaveStatus = async () => {
+    if (!selectedSubmission) return;
+
+    console.log('Saving status update:', {
+      userActivityId: selectedSubmission.userActivityId,
+      status: selectedStatus,
+      justification,
+    });
+
+    // TODO: Implement API call to update status
+    // await updateSubmissionStatus(selectedSubmission.userActivityId, selectedStatus, justification);
+
+    handleCloseModal();
+    router.refresh();
   };
 
   return (
@@ -71,7 +140,6 @@ export function CompletedActivitiesTable({
                 <TableCell className="text-center text-gray-700">
                   <div className="flex items-center justify-center">
                     <span className="text-sm font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
-                      {/* Points would come from activity, using placeholder */}
                       -
                     </span>
                   </div>
@@ -84,17 +152,11 @@ export function CompletedActivitiesTable({
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => setSelectedSubmission(submission)}
-                      className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                      onClick={() => handleOpenModal(submission)}
+                      className="p-2 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                       title="Visualizar detalhes"
                     >
                       <Eye className="w-4 h-4 text-blue-600" />
-                    </button>
-                    <button
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Desaprovar"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
                     </button>
                   </div>
                 </TableCell>
@@ -115,84 +177,118 @@ export function CompletedActivitiesTable({
         />
       </div>
 
-      {/* Details Modal - placeholder */}
       {selectedSubmission && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 flex items-center justify-center"
-          onClick={() => setSelectedSubmission(null)}
+          className="fixed inset-0 bg-black/20 z-40 flex items-center justify-center p-4"
+          onClick={handleCloseModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full m-4 p-6"
+            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                {selectedSubmission.activityName}
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-base font-semibold text-gray-900">
+                Atividade | {selectedSubmission.activityName}
               </h2>
               <button
-                onClick={() => setSelectedSubmission(null)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                ✕
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-1">PRODUTOR</p>
-                  <p className="text-sm text-gray-900">
-                    {selectedSubmission.producerName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-1">FAZENDA</p>
-                  <p className="text-sm text-gray-900">
-                    {selectedSubmission.farmName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-1">STATUS</p>
-                  <Badge variant={statusBadgeVariant[selectedSubmission.status] || 'rascunho'}>
-                    {selectedSubmission.status === 'submitted' ? 'Pendente' : selectedSubmission.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-1">DATA</p>
-                  <p className="text-sm text-gray-900">
-                    {new Date(selectedSubmission.submittedAt).toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
+            <div className="p-6 space-y-5">
+              <div>
+                <Badge variant="fazenda">
+                  Fazenda {selectedSubmission.farmName}
+                </Badge>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-normal mb-2 leading-none tracking-[0.02em] font-sans">
+                  Descrição da atividade
+                </h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Campo ausente
+                </p>
               </div>
 
               {selectedSubmission.files && selectedSubmission.files.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-3">ARQUIVOS</p>
-                  <div className="space-y-2">
-                    {selectedSubmission.files.map((file) => (
+                  <h3 className="text-sm font-normal mb-3 leading-none tracking-[0.02em] font-sans">
+                    Registro de atividades do usuário
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {selectedSubmission.files.slice(0, 6).map((file) => (
                       <a
                         key={file.fileId}
-                        href={file.fileUrl}
+                        href={getFileUrl(file.gsutilUri)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors cursor-pointer"
+                        title={file.fileName}
                       >
-                        <span className="text-blue-600 hover:underline text-sm">
-                          {file.fileName}
-                        </span>
+                        <FilePreview file={file} />
                       </a>
                     ))}
                   </div>
                 </div>
               )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="status" className="block text-sm font-normal mb-2 leading-none tracking-[0.02em] font-sans">
+                    Status da atividade
+                  </label>
+                  <select
+                    id="status"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                  >
+                    <option value="submitted" disabled={selectedSubmission.status !== 'submitted'}>
+                      Pendente
+                    </option>
+                    <option value="approved">
+                      Aprovado
+                    </option>
+                    <option value="rejected">
+                      Rejeitado
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="justification" className="block text-sm font-normal mb-2 leading-none tracking-[0.02em] font-sans">
+                    Justificativa
+                  </label>
+                  <textarea
+                    id="justification"
+                    value={justification}
+                    onChange={(e) => setJustification(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-[80px] bg-white text-gray-900"
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6 flex gap-3 pt-4 border-t border-gray-200">
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
               <button
-                onClick={() => setSelectedSubmission(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                onClick={handleCloseModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
-                Fechar
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveStatus}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#0B63E5] rounded-md hover:bg-[#0951bd] transition-colors"
+              >
+                Salvar
               </button>
             </div>
           </div>
