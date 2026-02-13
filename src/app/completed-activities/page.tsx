@@ -65,7 +65,7 @@ export default async function CompletedActivitiesPage({
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">
             <EmptyState
               title="Sem atividades realizadas"
-              description="Nenhuma atividade foi realizada pelos produtores ainda"
+              description="Nenhuma atividade aguardando aprovação"
             />
           </div>
         )}
