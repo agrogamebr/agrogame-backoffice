@@ -87,8 +87,8 @@ export function CompletedActivitiesTable({
                 </TableCell>
                 <TableCell className="text-center text-gray-700">
                   <div className="flex items-center justify-center">
-                    <span className="text-sm font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
-                      -
+                    <span className="text-sm font-semibold text-[#0B63E5] px-3 py-1 rounded-full">
+                      {submission.points}
                     </span>
                   </div>
                 </TableCell>

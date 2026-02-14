@@ -74,7 +74,6 @@ export function ActivityDecisionModal({
         className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">
             Atividade | {submission.activityName}
@@ -107,7 +106,7 @@ export function ActivityDecisionModal({
               Descrição da atividade
             </h3>
             <p className="text-sm text-gray-700 leading-relaxed">
-              Campo ausente
+              {submission.description}
             </p>
           </div>
 

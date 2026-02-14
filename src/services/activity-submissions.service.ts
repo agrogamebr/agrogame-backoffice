@@ -21,6 +21,8 @@ export interface ActivitySubmission {
   filesCount: number;
   status: string;
   files: SubmissionFile[];
+  points: number;
+  description: string;
 }
 
 export interface ActivitySubmissionsResponse {
