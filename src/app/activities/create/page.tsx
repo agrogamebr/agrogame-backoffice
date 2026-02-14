@@ -5,14 +5,14 @@ import { listCropTypes, listFarms, listProductionUnits, getActivityById, Activit
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export default async function CreateActivityPage({ 
-  searchParams 
-}: { 
-  searchParams: Promise<{ id?: string }> 
+export default async function CreateActivityPage({
+  searchParams
+}: {
+  searchParams: Promise<{ id?: string }>
 }) {
   const params = await searchParams;
   const activityId = params.id ? parseInt(params.id, 10) : null;
-  
+
   let cropTypes: { id: number; label: string }[] = [];
   let farms: { id: number; label: string }[] = [];
   let productionUnits: { id: number; label: string }[] = [];
@@ -43,10 +43,6 @@ export default async function CreateActivityPage({
     // If editing, fetch the activity data
     if (activityId) {
       initialActivity = await getActivityById(activityId);
-      console.log('📄 [CreateActivityPage] Activity fetched:', { 
-        activityId, 
-        thumbnailGsutilUri: initialActivity?.thumbnailGsutilUri 
-      });
     }
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };

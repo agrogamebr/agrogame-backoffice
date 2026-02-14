@@ -16,10 +16,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
-  console.log('[apiFetch] ===== API REQUEST =====');
-  console.log('[apiFetch] URL:', fullUrl);
-  console.log('[apiFetch] Headers:', JSON.stringify(headers, null, 2));
-
   const response = await fetch(fullUrl, {
     ...options,
     headers,

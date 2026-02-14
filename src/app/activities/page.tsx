@@ -4,7 +4,6 @@ import { EmptyState } from '@/components/activities/EmptyState';
 import { ActivitiesTable, Activity, ActivityStatus } from '@/components/activities/ActivitiesTable';
 import { listActivities } from '@/services/activity.service';
 import { listCropTypes, listFarms, listProductionUnits } from '@/services/activity-create.service';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 const statusMapping: Record<string, ActivityStatus> = {
@@ -77,10 +76,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };
     if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
-      const cookieStore = await cookies();
-      cookieStore.delete('token');
-      cookieStore.delete('user_info');
-      redirect(`/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
+      redirect(`/api/auth/logout?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
     }
     console.error(error);
   }
@@ -103,7 +99,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
           </Link>
 
           <div className="w-48 h-11">
-            <ActivitiesFilter 
+            <ActivitiesFilter
               cropTypes={cropTypes}
               farms={farms}
               productionUnits={productionUnits}

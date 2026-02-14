@@ -19,14 +19,12 @@ export function ActivityImageUpload({
   initialImageGsUri,
 }: ActivityImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   // Build proxy URL if initialImageGsUri is provided
-  const initialPreviewUrl = initialImageGsUri 
+  const initialPreviewUrl = initialImageGsUri
     ? `/api/files/proxy?url=${encodeURIComponent(initialImageGsUri)}`
     : null;
-  
-  console.log('📸 [ActivityImageUpload] Props:', { initialImageGsUri, initialPreviewUrl });
-  
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl);
   const [fileName, setFileName] = useState<string | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
@@ -47,27 +45,19 @@ export function ActivityImageUpload({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
-      console.log('📸 [ActivityImageUpload] No file selected');
       setPreviewUrl(null);
       setBlobUrl(null);
       setFileName(null);
       return;
     }
 
-    console.log('📸 [ActivityImageUpload] File selected:', { 
-      name: file.name, 
-      size: file.size, 
-      type: file.type,
-      actualFile: !!file 
-    });
-
     const nextBlobUrl = URL.createObjectURL(file);
-    
+
     // Revoke previous blob URL if it exists
     if (blobUrl) {
       URL.revokeObjectURL(blobUrl);
     }
-    
+
     setPreviewUrl(nextBlobUrl);
     setBlobUrl(nextBlobUrl);
     setFileName(file.name);

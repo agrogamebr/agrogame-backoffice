@@ -14,14 +14,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('🔗 [Proxy] Forwarding to backend:', { url });
-
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
-    // Call the backend proxy endpoint
     const backendUrl = `${API_BASE_URL}/api/files/proxy?url=${encodeURIComponent(url)}`;
-    
+
     const response = await fetch(backendUrl, {
       headers: {
         ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -29,10 +26,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      console.error('🔗 [Proxy] Backend error:', { 
-        url, 
+      console.error('🔗 [Proxy] Backend error:', {
+        url,
         status: response.status,
-        statusText: response.statusText 
+        statusText: response.statusText
       });
       return NextResponse.json(
         { error: `Backend returned: ${response.statusText}` },
@@ -42,11 +39,9 @@ export async function GET(request: NextRequest) {
 
     // Get content type from backend response
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
-    
+
     // Get the file buffer
     const buffer = await response.arrayBuffer();
-
-    console.log('🔗 [Proxy] Success:', { url, size: buffer.byteLength });
 
     // Return with appropriate headers
     return new NextResponse(buffer, {

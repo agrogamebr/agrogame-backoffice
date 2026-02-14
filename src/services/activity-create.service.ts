@@ -34,6 +34,7 @@ export async function listCropTypes(): Promise<CropTypeResponse[]> {
   }
 
   const data = (await response.json()) as CropTypesListResponse;
+
   return data.crop_types.filter((item) => item.isActive);
 }
 
@@ -48,6 +49,7 @@ export async function listFarms(): Promise<FarmResponse[]> {
   }
 
   const data = (await response.json()) as FarmResponse[];
+
   return data.filter((item) => item.active);
 }
 
@@ -123,11 +125,6 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  // Log detailed request information
-  console.log('🔍 [Activity Create] Request Details:');
-  console.log('📤 Endpoint:', `${API_BASE_URL}/api/activity/create-activity`);
-  console.log('📋 FormData Contents:');
-  
   // Convert FormData to readable object for logging
   const formDataLog: Record<string, unknown> = {};
   formData.forEach((value, key) => {
@@ -141,7 +138,6 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
       formDataLog[key] = value;
     }
   });
-  console.log(JSON.stringify(formDataLog, null, 2));
 
   const response = await fetch(`${API_BASE_URL}/api/activity/create-activity`, {
     method: 'POST',
@@ -244,11 +240,6 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  // Log detailed request information
-  console.log('🔍 [Activity Update] Request Details:');
-  console.log('📤 Endpoint:', `${API_BASE_URL}/api/activity/${activityId}`);
-  console.log('📋 FormData Contents:');
-  
   const formDataLog: Record<string, unknown> = {};
   formData.forEach((value, key) => {
     if (formDataLog[key]) {
@@ -261,7 +252,6 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
       formDataLog[key] = value;
     }
   });
-  console.log(JSON.stringify(formDataLog, null, 2));
 
   const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}`, {
     method: 'PUT',
