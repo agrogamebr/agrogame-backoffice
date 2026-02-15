@@ -2,7 +2,7 @@
 
 import { CreateActivityForm } from './CreateActivityForm';
 import { listCropTypes, listFarms, listProductionUnits, getActivityById, ActivityDetail } from '@/services/activity-create.service';
-import { cookies } from 'next/headers';
+
 import { redirect } from 'next/navigation';
 
 export default async function CreateActivityPage({
@@ -22,7 +22,8 @@ export default async function CreateActivityPage({
     const [cropTypesResponse, farmsResponse, productionUnitsResponse] = await Promise.all([
       listCropTypes(),
       listFarms(),
-      listProductionUnits(),
+      [{ id: 1, name: 'Produção 1' }],
+      // listProductionUnits(),
     ]);
 
     cropTypes = cropTypesResponse.map((item) => ({
@@ -47,10 +48,7 @@ export default async function CreateActivityPage({
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number };
     if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
-      const cookieStore = await cookies();
-      cookieStore.delete('token');
-      cookieStore.delete('user_info');
-      redirect(`/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
+      redirect(`/api/auth/logout?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
     }
     console.error(error);
   }

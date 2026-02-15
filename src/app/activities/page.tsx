@@ -42,7 +42,8 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
     const [cropTypesResponse, farmsResponse, productionUnitsResponse, activitiesResponse] = await Promise.all([
       listCropTypes(),
       listFarms(),
-      listProductionUnits(),
+      // listProductionUnits(),
+      [{ id: 1, name: 'Produção 1' }],
       listActivities(page, size, filters),
     ]);
 

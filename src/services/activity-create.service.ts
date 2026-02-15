@@ -14,7 +14,7 @@ export interface CropTypesListResponse {
 export interface FarmResponse {
   id: number;
   name: string;
-  active: boolean;
+  ownerId: number;
 }
 
 export interface ProductionUnitResponse {
@@ -39,7 +39,7 @@ export async function listCropTypes(): Promise<CropTypeResponse[]> {
 }
 
 export async function listFarms(): Promise<FarmResponse[]> {
-  const response = await apiFetch('/api/farms');
+  const response = await apiFetch('/api/backoffice/farms/list');
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -48,9 +48,27 @@ export async function listFarms(): Promise<FarmResponse[]> {
     throw error;
   }
 
-  const data = (await response.json()) as FarmResponse[];
+  const data = await response.json();
 
-  return data.filter((item) => item.active);
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  // Handle different potential response structures
+  if (data.farms && Array.isArray(data.farms)) {
+    return data.farms;
+  }
+
+  if (data.items && Array.isArray(data.items)) {
+    return data.items;
+  }
+
+  if (data.content && Array.isArray(data.content)) {
+    return data.content;
+  }
+
+  console.warn('Unexpected farms response structure:', data);
+  return [];
 }
 
 export async function listProductionUnits(): Promise<ProductionUnitResponse[]> {
