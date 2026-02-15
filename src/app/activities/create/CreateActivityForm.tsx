@@ -102,35 +102,37 @@ export function CreateActivityForm({
         await draftAction(formData);
       } catch (error: unknown) {
         const err = error as Error & { message?: string };
+        const previousValues = {
+          name: (formData.get('activityName') as string) || '',
+          description: (formData.get('activityDescription') as string) || '',
+          points: (formData.get('activityPoints') as string) || '',
+          validFrom: (formData.get('startDate') as string) || '',
+          validTo: (formData.get('endDate') as string) || '',
+        };
+        
         if (err?.message) {
           try {
             const errors = JSON.parse(err.message);
             return {
               errors,
               isValidationError: true,
-              previousValues: {
-                name: (formData.get('activityName') as string) || '',
-                description: (formData.get('activityDescription') as string) || '',
-                points: (formData.get('activityPoints') as string) || '',
-                validFrom: (formData.get('startDate') as string) || '',
-                validTo: (formData.get('endDate') as string) || '',
-              },
+              previousValues,
             };
           } catch {
             return {
               errors: { general: err.message },
               isValidationError: true,
-              previousValues: {
-                name: (formData.get('activityName') as string) || '',
-                description: (formData.get('activityDescription') as string) || '',
-                points: (formData.get('activityPoints') as string) || '',
-                validFrom: (formData.get('startDate') as string) || '',
-                validTo: (formData.get('endDate') as string) || '',
-              },
+              previousValues,
             };
           }
         }
-        throw error;
+        
+        // Erro sem mensagem - retornar erro genérico
+        return {
+          errors: { general: 'Erro ao salvar rascunho. Por favor, tente novamente.' },
+          isValidationError: false,
+          previousValues,
+        };
       }
     },
     undefined,
@@ -142,35 +144,37 @@ export function CreateActivityForm({
         await sendAction(formData);
       } catch (error: unknown) {
         const err = error as Error & { message?: string };
+        const previousValues = {
+          name: (formData.get('activityName') as string) || '',
+          description: (formData.get('activityDescription') as string) || '',
+          points: (formData.get('activityPoints') as string) || '',
+          validFrom: (formData.get('startDate') as string) || '',
+          validTo: (formData.get('endDate') as string) || '',
+        };
+        
         if (err?.message) {
           try {
             const errors = JSON.parse(err.message);
             return {
               errors,
               isValidationError: true,
-              previousValues: {
-                name: (formData.get('activityName') as string) || '',
-                description: (formData.get('activityDescription') as string) || '',
-                points: (formData.get('activityPoints') as string) || '',
-                validFrom: (formData.get('startDate') as string) || '',
-                validTo: (formData.get('endDate') as string) || '',
-              },
+              previousValues,
             };
           } catch {
             return {
               errors: { general: err.message },
               isValidationError: true,
-              previousValues: {
-                name: (formData.get('activityName') as string) || '',
-                description: (formData.get('activityDescription') as string) || '',
-                points: (formData.get('activityPoints') as string) || '',
-                validFrom: (formData.get('startDate') as string) || '',
-                validTo: (formData.get('endDate') as string) || '',
-              },
+              previousValues,
             };
           }
         }
-        throw error;
+        
+        // Erro sem mensagem - retornar erro genérico
+        return {
+          errors: { general: 'Erro ao enviar atividade. Por favor, tente novamente.' },
+          isValidationError: false,
+          previousValues,
+        };
       }
     },
     undefined,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useToast } from '@/components/ui/Toast';
 
 export function ActivitiesToastHandler() {
@@ -9,12 +9,15 @@ export function ActivitiesToastHandler() {
   const router = useRouter();
   const pathname = usePathname();
   const { addToast } = useToast();
+  const shownMessages = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const successMessage = searchParams.get('success');
 
-    if (successMessage) {
-      addToast(successMessage, 'success');
+    if (successMessage && !shownMessages.current.has(successMessage)) {
+      shownMessages.current.add(successMessage);
+      
+      addToast(successMessage, 'success', 10000);
 
       // Remove the success param from URL without refreshing
       const params = new URLSearchParams(searchParams.toString());

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 
 export interface SelectableCheckboxItem {
   id: number;
@@ -33,6 +33,19 @@ export function SelectableCheckboxList({
       return new Set(items.map((item) => item.id));
     }
   );
+  
+  const isInitialMount = useRef(true);
+  
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    if (onSelectionChange) {
+      onSelectionChange(Array.from(selectedIds));
+    }
+  }, [selectedIds, onSelectionChange]);
 
   const filteredItems = useMemo(() => {
     const term = filter.trim().toLowerCase();
@@ -44,17 +57,11 @@ export function SelectableCheckboxList({
 
   const handleToggleAll = () => {
     setSelectedIds((current) => {
-      let next: Set<number>;
       if (current.size === items.length) {
-        next = new Set();
+        return new Set();
       } else {
-        next = new Set(items.map((item) => item.id));
+        return new Set(items.map((item) => item.id));
       }
-
-      if (onSelectionChange) {
-        onSelectionChange(Array.from(next));
-      }
-      return next;
     });
   };
 
@@ -65,10 +72,6 @@ export function SelectableCheckboxList({
         next.delete(id);
       } else {
         next.add(id);
-      }
-
-      if (onSelectionChange) {
-        onSelectionChange(Array.from(next));
       }
       return next;
     });

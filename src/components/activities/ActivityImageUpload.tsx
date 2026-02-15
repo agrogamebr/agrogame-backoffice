@@ -86,7 +86,7 @@ export function ActivityImageUpload({
             <button
               type="button"
               onClick={handleSelectFile}
-              className="text-sm font-semibold text-[#0B63E5] hover:text-[#0951bd]"
+              className="text-sm font-semibold text-[#0B63E5] hover:text-[#0951bd] cursor-pointer"
             >
               Selecionar nova imagem
             </button>
@@ -95,7 +95,7 @@ export function ActivityImageUpload({
           <button
             type="button"
             onClick={handleSelectFile}
-            className="w-full text-sm font-semibold text-gray-600 hover:text-[#0B63E5]"
+            className="w-full text-sm font-semibold text-gray-600 hover:text-[#0B63E5] cursor-pointer"
           >
             Upload da imagem
           </button>
