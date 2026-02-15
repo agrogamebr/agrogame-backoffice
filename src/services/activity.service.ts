@@ -5,7 +5,7 @@ export interface ActivityResponse {
   name: string;
   description: string;
   points: number;
-  statusCode: 'draft' | 'send' | 'deleted' | 'completed' | 'cancelled';
+  statusCode: 'draft' | 'send' | 'deleted' | 'completed' | 'canceled';
   validFrom: string;
   validTo: string;
   thumbnailUrl: string | null;
@@ -25,8 +25,33 @@ export interface ActivityListResponse {
   totalElements: number;
 }
 
-export async function listActivities(page: number = 0, size: number = 10): Promise<ActivityListResponse> {
-  const response = await apiFetch(`/api/backoffice/activities/list?page=${page}&size=${size}`);
+export async function listActivities(
+  page: number = 0,
+  size: number = 10,
+  filters?: {
+    status?: string;
+    cropTypeId?: string;
+    farmId?: string;
+    productionUnitId?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+): Promise<ActivityListResponse> {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+
+  // Add filter parameters if provided
+  if (filters) {
+    if (filters.status) params.append('status', filters.status);
+    if (filters.cropTypeId) params.append('cropTypeId', filters.cropTypeId);
+    if (filters.farmId) params.append('farmId', filters.farmId);
+    if (filters.productionUnitId) params.append('productionUnitId', filters.productionUnitId);
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+  }
+
+  const response = await apiFetch(`/api/backoffice/activities/list?${params.toString()}`);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

@@ -1,19 +1,27 @@
+
 'use client';
 
+import { useState, useTransition } from 'react';
 import { Pencil, Trash2, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
+import ConfirmModal from '@/components/ConfirmModal';
+import { cancelActivity } from '@/app/actions/activity';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 
 export type ActivityStatus = 'Enviado' | 'Rascunho' | 'Excluída' | 'Completado' | 'Cancelado';
+export type ActivityStatusCode = 'draft' | 'send' | 'deleted' | 'completed' | 'canceled';
 
 export interface Activity {
   id: string;
   name: string;
   status: ActivityStatus;
+  statusCode: ActivityStatusCode;
   points: number;
   createdAt: string;
+  rowKey: string;
 }
 
 interface ActivitiesTableProps {
@@ -41,6 +49,9 @@ export function ActivitiesTable({
 }: ActivitiesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [activityToCancel, setActivityToCancel] = useState<Activity | null>(null);
+  const [isCancelling, startCancelTransition] = useTransition();
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
@@ -56,13 +67,29 @@ export function ActivitiesTable({
   };
 
   const handleEdit = (id: string) => {
-    console.log('Edit', id);
-    // TODO: Implement navigation or modal logic
+    router.push(`/activities/create?id=${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete', id);
-    // TODO: Implement delete logic (maybe modal confirmation then Server Action)
+  const handleCancelClick = (activity: Activity) => {
+    setActivityToCancel(activity);
+    setIsConfirmOpen(true);
+  };
+
+  const handleCancelConfirm = () => {
+    if (!activityToCancel) return;
+
+    startCancelTransition(async () => {
+      try {
+        await cancelActivity(activityToCancel.id);
+        setIsConfirmOpen(false);
+        setActivityToCancel(null);
+        router.refresh();
+      } catch (error) {
+        console.error('Failed to cancel activity', error);
+        setIsConfirmOpen(false);
+        setActivityToCancel(null);
+      }
+    });
   };
 
   const handleSend = (id: string) => {
@@ -75,9 +102,17 @@ export function ActivitiesTable({
     return date.toLocaleDateString('pt-BR');
   };
 
-  const showSendButton = (status: ActivityStatus) => {
-    return status !== 'Enviado' && status !== 'Completado';
+  const showSendButton = (statusCode: ActivityStatusCode) => {
+    return statusCode !== 'send' && statusCode !== 'completed' && statusCode !== 'canceled';
   };
+
+  const showCancelButton = (statusCode: ActivityStatusCode) => {
+    return statusCode === 'draft';
+  };
+
+  const showEditButton = (statusCode: ActivityStatusCode) => {
+    return statusCode !== 'canceled';
+  }
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm">
@@ -93,7 +128,7 @@ export function ActivitiesTable({
         </TableHeader>
         <TableBody>
           {activities.map((activity) => (
-            <TableRow key={activity.id}>
+            <TableRow key={activity.rowKey}>
               <TableCell>
                 <Badge variant={statusBadgeVariant[activity.status]}>
                   {activity.status}
@@ -110,30 +145,40 @@ export function ActivitiesTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => handleEdit(activity.id)}
-                    className="p-2 transition-transform hover:scale-110 cursor-pointer"
-                    title="Editar"
-                  >
-                    <Pencil className="w-4 h-4 text-[#0B63E5]" />
-                  </button>
+                  {showEditButton(activity.statusCode) && (
+                    <Button
+                      onClick={() => handleEdit(activity.id)}
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                    </Button>
+                  )}
 
-                  <button
-                    onClick={() => handleDelete(activity.id)}
-                    className="p-2 transition-transform hover:scale-110 cursor-pointer"
-                    title="Excluir"
-                  >
-                    <Trash2 className="w-4 h-4 text-[#FF383C]" />
-                  </button>
+                  {showCancelButton(activity.statusCode) && (
+                    <Button
+                      onClick={() => handleCancelClick(activity)}
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
+                      title="Cancelar"
+                    >
+                      <Trash2 className="w-4 h-4 text-[#FF383C]" />
+                    </Button>
+                  )}
 
-                  {showSendButton(activity.status) && (
-                    <button
+                  {showSendButton(activity.statusCode) && (
+                    <Button
                       onClick={() => handleSend(activity.id)}
-                      className="p-2 transition-transform hover:scale-110 cursor-pointer"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
                       title="Enviar"
                     >
                       <Send className="w-4 h-4 text-[#00C448]" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </TableCell>
@@ -150,6 +195,22 @@ export function ActivitiesTable({
         hasActivitiesOnPage={activities.length > 0}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Cancelar atividade"
+        description={activityToCancel ? `Deseja cancelar a atividade "${activityToCancel.name}"?` : 'Deseja cancelar esta atividade?'}
+        confirmLabel="Sim"
+        cancelLabel="Não"
+        isConfirming={isCancelling}
+        onClose={() => {
+          if (!isCancelling) {
+            setIsConfirmOpen(false);
+            setActivityToCancel(null);
+          }
+        }}
+        onConfirm={handleCancelConfirm}
       />
     </div>
   );

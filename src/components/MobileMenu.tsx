@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { LayoutDashboard, User, FileText, X, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Button } from './ui/Button';
 
 const menuItems = [
   { icon: LayoutDashboard, href: '/', label: 'Dashboard' },
@@ -18,13 +19,15 @@ interface MobileMenuProps {
 
 export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className="block md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+      variant="ghost"
+      size="icon"
+      className="block md:hidden"
       aria-label="Menu"
     >
       <Menu className="w-6 h-6 text-gray-700" />
-    </button>
+    </Button>
   );
 }
 
@@ -53,13 +56,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         {/* Header do Drawer */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            variant="ghost"
+            size="icon"
             aria-label="Fechar menu"
           >
             <X className="w-6 h-6 text-gray-700" />
-          </button>
+          </Button>
         </div>
 
         {/* Items de Navegação */}

@@ -1,40 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { apiFetch } from '@/lib/api';
+import { cookies } from 'next/headers';
+import { API_BASE_URL } from '@/services/auth.service';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const gsutilUri = searchParams.get('url');
+    const url = searchParams.get('url');
 
-    if (!gsutilUri) {
+    if (!url) {
       return NextResponse.json(
-        { error: 'url parameter is required' },
+        { error: 'URL parameter is required' },
         { status: 400 }
       );
     }
 
-    const endpoint = `/api/files/proxy?url=${encodeURIComponent(gsutilUri)}`;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
 
-    const response = await apiFetch(endpoint);
+    const backendUrl = `${API_BASE_URL}/api/files/proxy?url=${encodeURIComponent(url)}`;
+
+    const response = await fetch(backendUrl, {
+      headers: {
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+    });
 
     if (!response.ok) {
-      console.error(`[File Proxy] Failed to fetch file: ${response.status}`);
-      return new NextResponse(null, { status: response.status });
+      console.error('🔗 [Proxy] Backend error:', {
+        url,
+        status: response.status,
+        statusText: response.statusText
+      });
+      return NextResponse.json(
+        { error: `Backend returned: ${response.statusText}` },
+        { status: response.status }
+      );
     }
 
-    const fileData = await response.arrayBuffer();
+    // Get content type from backend response
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
 
-    return new NextResponse(fileData, {
+    // Get the file buffer
+    const buffer = await response.arrayBuffer();
+
+    // Return with appropriate headers
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
-    console.error('[File Proxy] Error:', error);
-    return new NextResponse(null, { status: 500 });
+    console.error('🔗 [Proxy] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to proxy file' },
+      { status: 500 }
+    );
   }
 }

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { CompletedActivitiesTable } from '@/components/activities/CompletedActivitiesTable';
 import { EmptyState } from '@/components/activities/EmptyState';
 import { listActivitySubmissions, ActivitySubmission } from '@/services/activity-submissions.service';
-import { cookies } from 'next/headers';
+
 import { redirect } from 'next/navigation';
 
 export default async function CompletedActivitiesPage({
@@ -30,11 +30,8 @@ export default async function CompletedActivitiesPage({
       error.message === 'Unauthorized' ||
       error.status === 401
     ) {
-      const cookieStore = await cookies();
-      cookieStore.delete('token');
-      cookieStore.delete('user_info');
       redirect(
-        `/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`
+        `/api/auth/logout?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`
       );
     }
     console.error(error);

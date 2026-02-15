@@ -1,8 +1,10 @@
+'use client';
+
 import { InputHTMLAttributes, forwardRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: string | React.ReactNode;
   error?: string;
   isPassword?: boolean;
 }

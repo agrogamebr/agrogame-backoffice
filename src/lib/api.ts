@@ -1,9 +1,22 @@
-import { cookies } from 'next/headers';
 import { API_BASE_URL } from '@/services/auth.service';
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  let token: string | undefined;
+
+  if (typeof window === 'undefined') {
+    // Server-side
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    token = cookieStore.get('token')?.value;
+  } else {
+    // Client-side
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    };
+    token = getCookie('token');
+  }
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -15,10 +28,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   }
 
   const fullUrl = `${API_BASE_URL}${endpoint}`;
-
-  console.log('[apiFetch] ===== API REQUEST =====');
-  console.log('[apiFetch] URL:', fullUrl);
-  console.log('[apiFetch] Headers:', JSON.stringify(headers, null, 2));
 
   const response = await fetch(fullUrl, {
     ...options,
