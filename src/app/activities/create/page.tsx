@@ -1,7 +1,7 @@
 'use server';
 
 import { CreateActivityForm } from './CreateActivityForm';
-import { listCropTypes, listFarms, listProductionUnits, getActivityById, ActivityDetail } from '@/services/activity-create.service';
+import { listCropTypes, listFarms, listProductionUnits, getActivityById, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
 
 import { redirect } from 'next/navigation';
 
@@ -22,8 +22,7 @@ export default async function CreateActivityPage({
     const [cropTypesResponse, farmsResponse, productionUnitsResponse] = await Promise.all([
       listCropTypes(),
       listFarms(),
-      [{ id: 1, name: 'Produção 1' }],
-      // listProductionUnits(),
+      Promise.resolve([] as ProductionUnitResponse[]),
     ]);
 
     cropTypes = cropTypesResponse.map((item) => ({

@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { ActivityImageUpload } from '@/components/activities/ActivityImageUpload';
 import { SelectableCheckboxList } from '@/components/activities/SelectableCheckboxList';
 import { saveActivityDraft, saveAndSendActivity, saveActivityDraftEdit, saveAndSendActivityEdit } from '@/app/actions/activity';
 import { useToast } from '@/components/ui/Toast';
-import { ActivityDetail } from '@/services/activity-create.service';
+import { listProductionUnitsFiltered, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
+import { getProductionUnitsAction } from '@/app/actions/production-units';
 
 interface CreateActivityFormProps {
   cropTypes: { id: number; label: string }[];
@@ -79,7 +80,7 @@ interface FormState {
 export function CreateActivityForm({
   cropTypes,
   farms,
-  productionUnits,
+  productionUnits, // initial list
   isEditing = false,
   initialActivity = null,
 }: CreateActivityFormProps) {
@@ -88,6 +89,12 @@ export function CreateActivityForm({
   // Determine which action to use based on mode
   const draftAction = isEditing ? saveActivityDraftEdit : saveActivityDraft;
   const sendAction = isEditing ? saveAndSendActivityEdit : saveAndSendActivity;
+
+  // Local state for tracking selections to filter production units
+  const [selectedFarmIds, setSelectedFarmIds] = useState<number[]>(initialActivity?.farmIds || []);
+  const [selectedCropTypeIds, setSelectedCropTypeIds] = useState<number[]>(initialActivity?.cropTypeIds || []);
+  const [availableProductionUnits, setAvailableProductionUnits] = useState<{ id: number; label: string }[]>(productionUnits);
+  const [loadingProductionUnits, setLoadingProductionUnits] = useState(false);
 
   const [stateDraft, formActionDraft, isPendingDraft] = useActionState<FormState | undefined, FormData>(
     async (_, formData) => {
@@ -181,6 +188,37 @@ export function CreateActivityForm({
     }
   }, [errors, addToast]);
 
+  // Fetch production units when farms or crops change
+  useEffect(() => {
+    async function fetchUnits() {
+      if (selectedFarmIds.length === 0) {
+        setAvailableProductionUnits([]);
+        return;
+      }
+
+      setLoadingProductionUnits(true);
+      try {
+        const response = await getProductionUnitsAction(selectedFarmIds, selectedCropTypeIds);
+        if (response.success && response.data) {
+          setAvailableProductionUnits(response.data.map((u: ProductionUnitResponse) => ({ id: u.id, label: u.name })));
+        } else {
+          // If action failed but didn't throw, we handle it as empty/error
+          console.error("Action returned error or empty data");
+          setAvailableProductionUnits([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch production units", error);
+        addToast("Erro ao carregar unidades produtivas", "error");
+        setAvailableProductionUnits([]);
+      } finally {
+        setLoadingProductionUnits(false);
+      }
+    }
+
+    fetchUnits();
+  }, [selectedFarmIds, selectedCropTypeIds, addToast]);
+
+
   const pageTitle = isEditing ? 'Editar atividade' : 'Criar atividade';
 
   // Set up default values for form fields
@@ -219,8 +257,8 @@ export function CreateActivityForm({
               initialImageGsUri={initialActivity?.thumbnailGsutilUri}
             />
 
-            <Input 
-              id="activity-name" 
+            <Input
+              id="activity-name"
               label={
                 <span>
                   Nome da atividade <RequiredIndicator />
@@ -245,23 +283,22 @@ export function CreateActivityForm({
                 defaultValue={defaultDescription}
                 required
                 aria-invalid={!!errors?.activityDescription}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${
-                  errors?.activityDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${errors?.activityDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                  }`}
               />
               {errors?.activityDescription && (
                 <p className="text-sm text-red-600">{errors.activityDescription}</p>
               )}
             </div>
 
-            <Input 
-              id="activity-points" 
+            <Input
+              id="activity-points"
               label={
                 <span>
                   Pontuação <RequiredIndicator />
                 </span>
               }
-              type="number" 
+              type="number"
               placeholder="0"
               name="activityPoints"
               defaultValue={defaultPoints}
@@ -283,7 +320,8 @@ export function CreateActivityForm({
                 filterPlaceholder="Filtrar cultura"
                 items={cropTypes}
                 inputName="cropTypeIds"
-                defaultSelectedIds={initialActivity?.cropTypeIds}
+                defaultSelectedIds={selectedCropTypeIds}
+                onSelectionChange={setSelectedCropTypeIds}
               />
               {errors?.cropTypeIds && (
                 <p className="mt-2 text-sm text-red-600">{errors.cropTypeIds}</p>
@@ -295,21 +333,27 @@ export function CreateActivityForm({
               filterPlaceholder="Filtrar fazendas"
               items={farms}
               inputName="farmIds"
-              defaultSelectedIds={initialActivity?.farmIds}
+              defaultSelectedIds={selectedFarmIds}
+              onSelectionChange={setSelectedFarmIds}
             />
 
-            <SelectableCheckboxList
-              title="Unidades produtivas"
-              filterPlaceholder="Filtrar unidades"
-              items={productionUnits}
-              inputName="productionUnitIds"
-              defaultSelectedIds={initialActivity?.productionUnitIds}
-            />
+            <div className={selectedFarmIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
+              <SelectableCheckboxList
+                title={loadingProductionUnits ? "Unidades produtivas (Carregando...)" : "Unidades produtivas"}
+                filterPlaceholder="Filtrar unidades"
+                items={availableProductionUnits}
+                inputName="productionUnitIds"
+                defaultSelectedIds={initialActivity?.productionUnitIds}
+              />
+              {selectedFarmIds.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">Selecione uma fazenda para ver as unidades</p>
+              )}
+            </div>
 
             <div className="space-y-6">
               <div>
-                <Input 
-                  id="start-date" 
+                <Input
+                  id="start-date"
                   type="date"
                   label={
                     <span>
@@ -324,8 +368,8 @@ export function CreateActivityForm({
               </div>
 
               <div>
-                <Input 
-                  id="end-date" 
+                <Input
+                  id="end-date"
                   type="date"
                   label={
                     <span>
@@ -343,8 +387,8 @@ export function CreateActivityForm({
         </SectionCard>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
-          <Link 
-            href="/activities" 
+          <Link
+            href="/activities"
             className="text-sm font-semibold text-gray-600 hover:text-gray-900"
             tabIndex={isLoading ? -1 : undefined}
           >

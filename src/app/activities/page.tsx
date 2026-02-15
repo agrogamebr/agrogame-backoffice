@@ -3,8 +3,9 @@ import { ActivitiesFilter } from '@/components/activities/ActivitiesFilter';
 import { EmptyState } from '@/components/activities/EmptyState';
 import { ActivitiesTable, Activity, ActivityStatus } from '@/components/activities/ActivitiesTable';
 import { listActivities } from '@/services/activity.service';
-import { listCropTypes, listFarms, listProductionUnits } from '@/services/activity-create.service';
+import { listCropTypes, listFarms, listProductionUnits, ProductionUnitResponse } from '@/services/activity-create.service';
 import { redirect } from 'next/navigation';
+import { ActivitiesToastHandler } from '@/components/activities/ActivitiesToastHandler';
 
 const statusMapping: Record<string, ActivityStatus> = {
   'draft': 'Rascunho',
@@ -42,8 +43,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
     const [cropTypesResponse, farmsResponse, productionUnitsResponse, activitiesResponse] = await Promise.all([
       listCropTypes(),
       listFarms(),
-      // listProductionUnits(),
-      [{ id: 1, name: 'Produção 1' }],
+      Promise.resolve([] as ProductionUnitResponse[]),
       listActivities(page, size, filters),
     ]);
 
@@ -86,6 +86,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
 
   return (
     <div className="max-w-8xl mx-4 space-y-4 pt-14">
+      <ActivitiesToastHandler />
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
         <h1 className="w-92 h-11 text-2xl font-bold text-gray-900 flex items-center">
           Gerenciamento de atividades
@@ -131,3 +132,5 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
     </div>
   );
 }
+
+

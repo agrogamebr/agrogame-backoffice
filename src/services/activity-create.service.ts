@@ -81,8 +81,106 @@ export async function listProductionUnits(): Promise<ProductionUnitResponse[]> {
     throw error;
   }
 
-  const data = (await response.json()) as { items: ProductionUnitResponse[] };
-  return data.items.filter((item) => item.isActive);
+  const data = (await response.json()) as { items?: ProductionUnitResponse[]; content?: ProductionUnitResponse[] };
+
+  const units = data.content || data.items || [];
+  return units.filter((item) => item.isActive);
+}
+
+export async function listProductionUnitsFiltered(
+  farmIds: number[],
+  cropTypeIds: number[]
+): Promise<ProductionUnitResponse[]> {
+  console.log('listProductionUnitsFiltered called with:', { farmIds, cropTypeIds });
+
+  // If no farms are selected, we shouldn't return any production units
+  if (!farmIds || farmIds.length === 0) {
+    console.log('No farms selected, returning empty list');
+    return [];
+  }
+
+  // If no crops are selected, we just fetch based on farms
+  const activeCropIds = cropTypeIds.length > 0 ? cropTypeIds : [null];
+
+  // We need to fetch for each combination of farm and crop
+  // Since the API only accepts single values, we'll make parallel requests
+  const promises: Promise<ProductionUnitResponse[]>[] = [];
+
+  for (const farmId of farmIds) {
+    for (const cropTypeId of activeCropIds) {
+      const params = new URLSearchParams();
+      params.append('farmId', farmId.toString());
+      if (cropTypeId) {
+        params.append('cropTypeId', cropTypeId.toString());
+      }
+
+      const url = `/api/backoffice/production-units/list?${params.toString()}`;
+      console.log(`Initialing fetch for: ${url}`);
+
+      promises.push(
+        apiFetch(url)
+          .then(async (res) => {
+            console.log(`Response received for ${url}. Status: ${res.status}`);
+
+            if (!res.ok) {
+              const errorText = await res.text().catch(() => 'Failed to read error text');
+              console.error(`Error fetching units for farm ${farmId}. Status: ${res.status}, Body: ${errorText}`);
+              return [];
+            }
+
+            try {
+              const rawData = await res.json();
+              console.log(`Raw JSON response for ${url}:`, JSON.stringify(rawData, null, 2));
+
+              let items: ProductionUnitResponse[] = [];
+
+              if (Array.isArray(rawData)) {
+                console.log(`Response is direct array of length ${rawData.length}`);
+                items = rawData;
+              } else if (rawData.content && Array.isArray(rawData.content)) {
+                console.log(`Response has 'content' array of length ${rawData.content.length}`);
+                items = rawData.content;
+              } else if (rawData.items && Array.isArray(rawData.items)) {
+                console.log(`Response has 'items' array of length ${rawData.items.length}`);
+                items = rawData.items;
+              } else {
+                console.warn(`Unexpected response structure for ${url}:`, rawData);
+              }
+
+              return items;
+            } catch (e) {
+              console.error(`Error parsing JSON for ${url}:`, e);
+              return [];
+            }
+          })
+          .catch((err) => {
+            console.error(`Network or unexpected error fetching production units for farm ${farmId}:`, err);
+            return [];
+          })
+      );
+    }
+  }
+
+  const results = await Promise.all(promises);
+  console.log('All fetch results (before flattening):', results);
+
+  // Flatten and deduplicate results
+  const allUnits = results.flat();
+  const uniqueUnits = new Map<number, ProductionUnitResponse>();
+
+  allUnits.forEach((unit) => {
+    // Check if unit object is valid and has id
+    if (unit && typeof unit.id !== 'undefined') {
+      // Only filter by isActive if the property exists and is explicitly false
+      if (unit.isActive === false) return;
+      uniqueUnits.set(unit.id, unit);
+    }
+  });
+
+  const finalUnits = Array.from(uniqueUnits.values());
+  console.log(`Final unique units returning: ${finalUnits.length}`, finalUnits);
+
+  return finalUnits;
 }
 
 export interface CreateActivityRequest {

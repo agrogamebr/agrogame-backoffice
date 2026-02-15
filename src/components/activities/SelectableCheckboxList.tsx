@@ -13,6 +13,7 @@ interface SelectableCheckboxListProps {
   items: SelectableCheckboxItem[];
   inputName: string;
   defaultSelectedIds?: number[];
+  onSelectionChange?: (selectedIds: number[]) => void;
 }
 
 export function SelectableCheckboxList({
@@ -21,6 +22,7 @@ export function SelectableCheckboxList({
   items,
   inputName,
   defaultSelectedIds = [],
+  onSelectionChange,
 }: SelectableCheckboxListProps) {
   const [filter, setFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
@@ -42,10 +44,17 @@ export function SelectableCheckboxList({
 
   const handleToggleAll = () => {
     setSelectedIds((current) => {
+      let next: Set<number>;
       if (current.size === items.length) {
-        return new Set();
+        next = new Set();
+      } else {
+        next = new Set(items.map((item) => item.id));
       }
-      return new Set(items.map((item) => item.id));
+
+      if (onSelectionChange) {
+        onSelectionChange(Array.from(next));
+      }
+      return next;
     });
   };
 
@@ -56,6 +65,10 @@ export function SelectableCheckboxList({
         next.delete(id);
       } else {
         next.add(id);
+      }
+
+      if (onSelectionChange) {
+        onSelectionChange(Array.from(next));
       }
       return next;
     });

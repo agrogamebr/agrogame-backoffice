@@ -3,6 +3,8 @@
 import { ChevronDown, Filter, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ProductionUnitResponse } from '@/services/activity-create.service';
+import { getProductionUnitsAction } from '@/app/actions/production-units';
 
 interface FilterOptions {
   status: string;
@@ -25,7 +27,7 @@ export function ActivitiesFilter({
 }: {
   cropTypes?: DropdownOption[];
   farms?: DropdownOption[];
-  productionUnits?: DropdownOption[];
+  productionUnits?: DropdownOption[]; // Initial list, likely empty if dependent on farms
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,6 +42,68 @@ export function ActivitiesFilter({
     endDate: searchParams.get('endDate') || '',
   });
 
+  const [availableProductionUnits, setAvailableProductionUnits] = useState<DropdownOption[]>(productionUnits);
+  const [loadingProductionUnits, setLoadingProductionUnits] = useState(false);
+
+  useEffect(() => {
+    async function fetchUnits() {
+      // Logic:
+      // If a farm is selected, we fetch units for that farm (and optionally filtered by crop if selected)
+      // If no farm is selected, we can show all units OR show none/disabled. 
+      // Requirement: "unidades produtivas carregadas devem depender da(s) fazenda(s) selecionada(s)"
+      // And "sempre que a fazenda selecionada alterar, o sistema precisa tentar buscar as unidades produtivas desta fazenda"
+
+      if (!filters.farmId) {
+        // If no farm is selected, we might want to show all initially loaded units or clear them.
+        // Assuming we fall back to the initial list passed via props if provided, or empty.
+        // But per requirement, it strongly suggests dependency. Let's see if we should clear it.
+        // If the initial page load has a farmId in URL, we want to fetch.
+
+        // If we are strictly following "depend on selected farm", then no farm = no specific units or all.
+        // But usually "All farms" means all units. However, fetching ALL units might be heavy if not paginated.
+        // Let's stick to: If farm is selected, filter. If not, maybe showing all passed from props (which might be all).
+        setAvailableProductionUnits(productionUnits);
+        return;
+      }
+
+      setLoadingProductionUnits(true);
+      try {
+        const farmIds = [parseInt(filters.farmId, 10)];
+        const cropTypeIds = filters.cropTypeId ? [parseInt(filters.cropTypeId, 10)] : [];
+
+
+        // ...
+
+        // inside useEffect
+        const response = await getProductionUnitsAction(farmIds, cropTypeIds);
+
+        if (response.success && response.data) {
+          const units = response.data;
+          setAvailableProductionUnits(units.map((u: ProductionUnitResponse) => ({ id: u.id, name: u.name })));
+
+          // If the currently selected production unit is not in the new list, clear it
+          if (filters.productionUnitId) {
+            const exists = units.some((u: ProductionUnitResponse) => u.id === parseInt(filters.productionUnitId, 10));
+            if (!exists) {
+              setFilters(prev => ({ ...prev, productionUnitId: '' }));
+            }
+          }
+        } else {
+          console.error('Failed to fetch production units:', response.error);
+          setAvailableProductionUnits([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch production units:', error);
+        setAvailableProductionUnits([]);
+      } finally {
+        setLoadingProductionUnits(false);
+      }
+    }
+
+    fetchUnits();
+  }, [filters.farmId, filters.cropTypeId, productionUnits]);
+
+
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -49,7 +113,7 @@ export function ActivitiesFilter({
 
   const handleApplyFilters = () => {
     const params = new URLSearchParams();
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
         params.append(key, value);
@@ -81,11 +145,10 @@ export function ActivitiesFilter({
     <div className="relative w-full h-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-full flex items-center justify-between px-4 rounded-lg border transition-all gap-2 cursor-pointer font-medium text-sm ${
-          hasActiveFilters
-            ? 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100'
-            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-        }`}
+        className={`w-full h-full flex items-center justify-between px-4 rounded-lg border transition-all gap-2 cursor-pointer font-medium text-sm ${hasActiveFilters
+          ? 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100'
+          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
       >
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4" />
@@ -175,10 +238,13 @@ export function ActivitiesFilter({
               <select
                 value={filters.productionUnitId}
                 onChange={(e) => handleFilterChange('productionUnitId', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B63E5] focus:border-transparent bg-white text-gray-900"
+                disabled={loadingProductionUnits}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B63E5] focus:border-transparent bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
               >
-                <option value="">Todas as unidades produtivas</option>
-                {productionUnits.map((unit) => (
+                <option value="">
+                  {loadingProductionUnits ? 'Carregando...' : 'Todas as unidades produtivas'}
+                </option>
+                {availableProductionUnits.map((unit) => (
                   <option key={unit.id} value={unit.id}>
                     {unit.name}
                   </option>
