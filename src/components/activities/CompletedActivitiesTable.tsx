@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination } from '@/components/ui/Pagination';
 import { ActivitySubmission } from '@/services/activity-submissions.service';
 import { ActivityDecisionModal } from './ActivityDecisionModal';
+import { Button } from '@/components/ui/Button';
 
 interface CompletedActivitiesTableProps {
   submissions: ActivitySubmission[];
@@ -99,13 +100,15 @@ export function CompletedActivitiesTable({
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button
+                    <Button
                       onClick={() => handleOpenModal(submission)}
-                      className="p-2 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-blue-50"
                       title="Visualizar detalhes"
                     >
                       <Eye className="w-4 h-4 text-blue-600" />
-                    </button>
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

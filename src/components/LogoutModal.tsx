@@ -22,12 +22,14 @@ export default function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalP
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Sair da conta</h2>
-            <button
+            <Button
               onClick={onClose}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+              variant="ghost"
+              size="icon"
+              className="rounded-full p-1 h-auto"
             >
               <X className="w-5 h-5 text-gray-400" />
-            </button>
+            </Button>
           </div>
 
           <p className="text-gray-600 mb-8">

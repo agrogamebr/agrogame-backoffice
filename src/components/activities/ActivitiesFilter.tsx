@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductionUnitResponse } from '@/services/activity-create.service';
 import { getProductionUnitsAction } from '@/app/actions/production-units';
+import { Button } from '@/components/ui/Button';
 
 interface FilterOptions {
   status: string;
@@ -143,9 +144,10 @@ export function ActivitiesFilter({
 
   return (
     <div className="relative w-full h-full">
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-full flex items-center justify-between px-4 rounded-lg border transition-all gap-2 cursor-pointer font-medium text-sm ${hasActiveFilters
+        variant={hasActiveFilters ? "ghost" : "ghost"}
+        className={`w-full h-full justify-between px-4 rounded-lg border gap-2 font-medium text-sm ${hasActiveFilters
           ? 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100'
           : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
           }`}
@@ -155,7 +157,7 @@ export function ActivitiesFilter({
           <span>Filtros</span>
         </div>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
+      </Button>
 
       {isOpen && (
         <div
@@ -168,12 +170,14 @@ export function ActivitiesFilter({
         <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-100 z-50 p-6 space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Filtrar atividades</h3>
-            <button
+            <Button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              variant="ghost"
+              size="icon"
+              className="p-1 h-auto"
             >
               <X className="w-5 h-5 text-gray-500" />
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -278,18 +282,20 @@ export function ActivitiesFilter({
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-gray-200">
-            <button
+            <Button
               onClick={handleClearFilters}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              variant="secondary"
+              className="flex-1 border border-gray-300"
             >
               Limpar filtros
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleApplyFilters}
-              className="flex-1 px-4 py-2 bg-[#0B63E5] text-white rounded-lg font-medium hover:bg-[#0951bd] transition-colors"
+              variant="primary"
+              className="flex-1 bg-[#0B63E5] hover:bg-[#0951bd]"
             >
               Aplicar filtros
-            </button>
+            </Button>
           </div>
         </div>
       )}

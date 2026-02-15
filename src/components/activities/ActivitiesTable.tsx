@@ -9,6 +9,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import ConfirmModal from '@/components/ConfirmModal';
 import { cancelActivity } from '@/app/actions/activity';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 
 export type ActivityStatus = 'Enviado' | 'Rascunho' | 'Excluída' | 'Completado' | 'Cancelado';
 export type ActivityStatusCode = 'draft' | 'send' | 'deleted' | 'completed' | 'canceled';
@@ -145,33 +146,39 @@ export function ActivitiesTable({
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
                   {showEditButton(activity.statusCode) && (
-                    <button
+                    <Button
                       onClick={() => handleEdit(activity.id)}
-                      className="p-2 transition-transform hover:scale-110 cursor-pointer"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
                       title="Editar"
                     >
                       <Pencil className="w-4 h-4 text-[#0B63E5]" />
-                    </button>
+                    </Button>
                   )}
 
                   {showCancelButton(activity.statusCode) && (
-                    <button
+                    <Button
                       onClick={() => handleCancelClick(activity)}
-                      className="p-2 transition-transform hover:scale-110 cursor-pointer"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
                       title="Cancelar"
                     >
                       <Trash2 className="w-4 h-4 text-[#FF383C]" />
-                    </button>
+                    </Button>
                   )}
 
                   {showSendButton(activity.statusCode) && (
-                    <button
+                    <Button
                       onClick={() => handleSend(activity.id)}
-                      className="p-2 transition-transform hover:scale-110 cursor-pointer"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
                       title="Enviar"
                     >
                       <Send className="w-4 h-4 text-[#00C448]" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </TableCell>

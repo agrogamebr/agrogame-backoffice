@@ -9,6 +9,7 @@ import { saveActivityDraft, saveAndSendActivity, saveActivityDraftEdit, saveAndS
 import { useToast } from '@/components/ui/Toast';
 import { listProductionUnitsFiltered, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
 import { getProductionUnitsAction } from '@/app/actions/production-units';
+import { Button } from '@/components/ui/Button';
 
 interface CreateActivityFormProps {
   cropTypes: { id: number; label: string }[];
@@ -398,20 +399,22 @@ export function CreateActivityForm({
           >
             Cancelar
           </Link>
-          <button
+          <Button
             formAction={formActionDraft}
             disabled={isLoading}
-            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 transition-colors duration-200 sm:min-w-45 box-border disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="ghost"
+            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 sm:min-w-45"
           >
             {isPendingDraft ? 'Salvando...' : 'Salvar rascunho'}
-          </button>
-          <button
+          </Button>
+          <Button
             formAction={formActionSend}
             disabled={isLoading}
-            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-[#0B63E5] text-white font-semibold hover:bg-[#0951bd] transition-colors duration-200 sm:min-w-55 box-border disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="primary"
+            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-[#0B63E5] text-white font-semibold hover:bg-[#0951bd] sm:min-w-55"
           >
             {isPendingSend ? 'Salvando...' : 'Salvar e enviar atividade'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

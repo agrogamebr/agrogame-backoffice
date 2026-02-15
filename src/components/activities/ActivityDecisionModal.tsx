@@ -6,6 +6,7 @@ import { ActivitySubmission } from '@/services/activity-submissions.service';
 import { submitDecisionAction } from '@/app/actions/activity-decision';
 import { getFileUrl } from '@/lib/file-utils';
 import { FilePreview } from './FilePreview';
+import { Button } from '@/components/ui/Button';
 
 interface ActivityDecisionModalProps {
   submission: ActivitySubmission;
@@ -78,14 +79,16 @@ export function ActivityDecisionModal({
           <h2 className="text-base font-semibold text-gray-900">
             Atividade | {submission.activityName}
           </h2>
-          <button
+          <Button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            variant="ghost"
+            size="icon"
+            className="text-gray-400 hover:text-gray-600 h-auto p-0"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -168,21 +171,25 @@ export function ActivityDecisionModal({
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-          <button
+          <Button
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+            variant="secondary"
+            size="sm"
+            className="border border-gray-300"
           >
             Cancelar
-          </button>
+          </Button>
           {!isReadOnly && (
-            <button
+            <Button
               onClick={handleSave}
               disabled={!isValid || isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#0B63E5] rounded-md hover:bg-[#0951bd] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              variant="primary"
+              size="sm"
+              className="bg-[#0B63E5] hover:bg-[#0951bd]"
             >
               {isSubmitting ? 'Salvando...' : 'Salvar'}
-            </button>
+            </Button>
           )}
         </div>
       </div>
