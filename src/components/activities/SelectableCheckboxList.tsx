@@ -27,10 +27,10 @@ export function SelectableCheckboxList({
   const [filter, setFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
     () => {
-      if (defaultSelectedIds.length > 0) {
+      if (defaultSelectedIds && defaultSelectedIds.length > 0) {
         return new Set(defaultSelectedIds);
       }
-      return new Set(items.map((item) => item.id));
+      return new Set();
     }
   );
   

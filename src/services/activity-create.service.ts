@@ -196,7 +196,41 @@ export interface CreateActivityRequest {
   sendNow: boolean;
 }
 
-export async function createActivity(data: CreateActivityRequest): Promise<void> {
+/**
+ * Uploads a thumbnail for an activity
+ * @param activityId - The ID of the activity
+ * @param thumbnail - The thumbnail file to upload
+ */
+export async function uploadActivityThumbnail(activityId: number, thumbnail: File): Promise<void> {
+  const formData = new FormData();
+  formData.append('thumbnail', thumbnail);
+
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const { API_BASE_URL } = await import('@/services/auth.service');
+
+  const headers: HeadersInit = {};
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/activity/activities/${activityId}/thumbnail`, {
+    method: 'POST',
+    body: formData,
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao fazer upload do thumbnail') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+}
+
+export async function createActivity(data: CreateActivityRequest): Promise<number> {
   const formData = new FormData();
 
   formData.append('description', data.description);
@@ -225,10 +259,7 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
     });
   }
 
-  // Add thumbnail if present
-  if (data.thumbnail) {
-    formData.append('thumbnail', data.thumbnail);
-  }
+  // Note: thumbnail will be uploaded separately after activity creation
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -267,6 +298,20 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
     error.status = response.status;
     throw error;
   }
+
+  const responseData = await response.json();
+  const activityId = responseData.id || responseData.activityId;
+
+  if (!activityId) {
+    throw new Error('ID da atividade não foi retornado pela API');
+  }
+
+  // Upload thumbnail separately if present
+  if (data.thumbnail) {
+    await uploadActivityThumbnail(activityId, data.thumbnail);
+  }
+
+  return activityId;
 }
 
 export interface ActivityDetail {
@@ -340,10 +385,7 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
     });
   }
 
-  // Add thumbnail if present
-  if (data.thumbnail) {
-    formData.append('thumbnail', data.thumbnail);
-  }
+  // Note: thumbnail will be uploaded separately after activity update
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -376,9 +418,17 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
   });
 
   if (!response.ok) {
+    console.log("DEU ERRO AO ATUALIZAR ATIVIDADE. Status:", response.status);
     const errorData = await response.json().catch(() => ({}));
     const error = new Error(errorData.message || 'Erro ao atualizar atividade') as Error & { status?: number };
     error.status = response.status;
     throw error;
+  }
+
+  console.log("DEU CERTO AO ATUALIZAR ATIVIDADE. Status:", response.status);
+
+  // Upload thumbnail separately if present
+  if (data.thumbnail) {
+    await uploadActivityThumbnail(activityId, data.thumbnail);
   }
 }
