@@ -357,35 +357,29 @@ export interface UpdateActivityRequest {
 }
 
 export async function updateActivity(activityId: number, data: UpdateActivityRequest): Promise<void> {
-  const formData = new FormData();
+  // Format dates to YYYY-MM-DD
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-  formData.append('description', data.description);
-  formData.append('name', data.name);
-  formData.append('points', data.points.toString());
-  formData.append('validFrom', data.validFrom);
-  formData.append('validTo', data.validTo);
-  formData.append('sendNow', data.sendNow.toString());
+  const requestBody = {
+    description: data.description,
+    name: data.name,
+    points: data.points,
+    validFrom: formatDate(data.validFrom),
+    validTo: formatDate(data.validTo),
+    sendNow: data.sendNow,
+    thumbnailUrl: null,
+    cropTypeIds: data.cropTypeIds || [],
+    farmIds: data.farmIds || [],
+    productionUnitIds: data.productionUnitIds || [],
+  };
 
-  // Add crop type IDs as array
-  data.cropTypeIds.forEach((id) => {
-    formData.append('cropTypeIds', id.toString());
-  });
-
-  // Add farm IDs as array (optional)
-  if (data.farmIds && data.farmIds.length > 0) {
-    data.farmIds.forEach((id) => {
-      formData.append('farmIds', id.toString());
-    });
-  }
-
-  // Add production unit IDs as array (optional)
-  if (data.productionUnitIds && data.productionUnitIds.length > 0) {
-    data.productionUnitIds.forEach((id) => {
-      formData.append('productionUnitIds', id.toString());
-    });
-  }
-
-  // Note: thumbnail will be uploaded separately after activity update
+  console.log('Body enviado para PUT /api/activity/${activityId}:', requestBody);
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -393,39 +387,25 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
 
   const { API_BASE_URL } = await import('@/services/auth.service');
 
-  const headers: HeadersInit = {};
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  const formDataLog: Record<string, unknown> = {};
-  formData.forEach((value, key) => {
-    if (formDataLog[key]) {
-      if (Array.isArray(formDataLog[key])) {
-        (formDataLog[key] as unknown[]).push(value);
-      } else {
-        formDataLog[key] = [formDataLog[key], value];
-      }
-    } else {
-      formDataLog[key] = value;
-    }
-  });
-
   const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}`, {
     method: 'PUT',
-    body: formData,
+    body: JSON.stringify(requestBody),
     headers,
   });
 
   if (!response.ok) {
-    console.log("DEU ERRO AO ATUALIZAR ATIVIDADE. Status:", response.status);
     const errorData = await response.json().catch(() => ({}));
     const error = new Error(errorData.message || 'Erro ao atualizar atividade') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
-
-  console.log("DEU CERTO AO ATUALIZAR ATIVIDADE. Status:", response.status);
 
   // Upload thumbnail separately if present
   if (data.thumbnail) {
