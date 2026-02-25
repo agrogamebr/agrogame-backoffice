@@ -7,7 +7,7 @@ import { ActivityImageUpload } from '@/components/activities/ActivityImageUpload
 import { SelectableCheckboxList } from '@/components/activities/SelectableCheckboxList';
 import { saveActivityDraft, saveAndSendActivity, saveActivityDraftEdit, saveAndSendActivityEdit } from '@/app/actions/activity';
 import { useToast } from '@/components/ui/Toast';
-import { listProductionUnitsFiltered, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
+import { ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
 import { getProductionUnitsAction } from '@/app/actions/production-units';
 import { Button } from '@/components/ui/Button';
 
@@ -92,8 +92,8 @@ export function CreateActivityForm({
   const sendAction = isEditing ? saveAndSendActivityEdit : saveAndSendActivity;
 
   // Local state for tracking selections to filter production units
-  const [selectedFarmIds, setSelectedFarmIds] = useState<number[]>(initialActivity?.farmIds || []);
-  const [selectedCropTypeIds, setSelectedCropTypeIds] = useState<number[]>(initialActivity?.cropTypeIds || []);
+  const [selectedFarmIds, setSelectedFarmIds] = useState<number[]>(isEditing && initialActivity?.farmIds ? initialActivity.farmIds : []);
+  const [selectedCropTypeIds, setSelectedCropTypeIds] = useState<number[]>(isEditing && initialActivity?.cropTypeIds ? initialActivity.cropTypeIds : []);
   const [availableProductionUnits, setAvailableProductionUnits] = useState<{ id: number; label: string }[]>(productionUnits);
   const [loadingProductionUnits, setLoadingProductionUnits] = useState(false);
 
@@ -348,7 +348,7 @@ export function CreateActivityForm({
                 filterPlaceholder="Filtrar unidades"
                 items={availableProductionUnits}
                 inputName="productionUnitIds"
-                defaultSelectedIds={initialActivity?.productionUnitIds}
+                defaultSelectedIds={isEditing && initialActivity?.productionUnitIds ? initialActivity.productionUnitIds : undefined}
               />
               {selectedFarmIds.length === 0 && (
                 <p className="text-xs text-gray-500 mt-1">Selecione uma fazenda para ver as unidades</p>
@@ -405,7 +405,7 @@ export function CreateActivityForm({
             variant="ghost"
             className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 sm:min-w-45"
           >
-            {isPendingDraft ? 'Salvando...' : 'Salvar rascunho'}
+            {isPendingDraft ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar rascunho'}
           </Button>
           <Button
             formAction={formActionSend}

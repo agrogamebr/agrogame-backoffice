@@ -91,11 +91,9 @@ export async function listProductionUnitsFiltered(
   farmIds: number[],
   cropTypeIds: number[]
 ): Promise<ProductionUnitResponse[]> {
-  console.log('listProductionUnitsFiltered called with:', { farmIds, cropTypeIds });
 
   // If no farms are selected, we shouldn't return any production units
   if (!farmIds || farmIds.length === 0) {
-    console.log('No farms selected, returning empty list');
     return [];
   }
 
@@ -115,12 +113,10 @@ export async function listProductionUnitsFiltered(
       }
 
       const url = `/api/backoffice/production-units/list?${params.toString()}`;
-      console.log(`Initialing fetch for: ${url}`);
 
       promises.push(
         apiFetch(url)
           .then(async (res) => {
-            console.log(`Response received for ${url}. Status: ${res.status}`);
 
             if (!res.ok) {
               const errorText = await res.text().catch(() => 'Failed to read error text');
@@ -130,18 +126,14 @@ export async function listProductionUnitsFiltered(
 
             try {
               const rawData = await res.json();
-              console.log(`Raw JSON response for ${url}:`, JSON.stringify(rawData, null, 2));
 
               let items: ProductionUnitResponse[] = [];
 
               if (Array.isArray(rawData)) {
-                console.log(`Response is direct array of length ${rawData.length}`);
                 items = rawData;
               } else if (rawData.content && Array.isArray(rawData.content)) {
-                console.log(`Response has 'content' array of length ${rawData.content.length}`);
                 items = rawData.content;
               } else if (rawData.items && Array.isArray(rawData.items)) {
-                console.log(`Response has 'items' array of length ${rawData.items.length}`);
                 items = rawData.items;
               } else {
                 console.warn(`Unexpected response structure for ${url}:`, rawData);
@@ -162,7 +154,6 @@ export async function listProductionUnitsFiltered(
   }
 
   const results = await Promise.all(promises);
-  console.log('All fetch results (before flattening):', results);
 
   // Flatten and deduplicate results
   const allUnits = results.flat();
@@ -178,7 +169,6 @@ export async function listProductionUnitsFiltered(
   });
 
   const finalUnits = Array.from(uniqueUnits.values());
-  console.log(`Final unique units returning: ${finalUnits.length}`, finalUnits);
 
   return finalUnits;
 }
@@ -196,7 +186,66 @@ export interface CreateActivityRequest {
   sendNow: boolean;
 }
 
-export async function createActivity(data: CreateActivityRequest): Promise<void> {
+/**
+ * Uploads a thumbnail for an activity
+ * @param activityId - The ID of the activity
+ * @param thumbnail - The thumbnail file to upload
+ */
+export async function uploadActivityThumbnail(activityId: number, thumbnail: File): Promise<void> {
+  const formData = new FormData();
+  formData.append('thumbnail', thumbnail);
+
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const { API_BASE_URL } = await import('@/services/auth.service');
+
+  const headers: HeadersInit = {};
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/activity/activities/${activityId}/thumbnail`, {
+    method: 'POST',
+    body: formData,
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao fazer upload do thumbnail') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+}
+
+export async function sendActtivity(activityId: number): Promise<void> {
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const { API_BASE_URL } = await import('@/services/auth.service');
+
+  const headers: HeadersInit = {};
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}/send`, {
+    method: 'PATCH',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao enviar atividade') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+}
+
+export async function createActivity(data: CreateActivityRequest): Promise<number> {
   const formData = new FormData();
 
   formData.append('description', data.description);
@@ -225,10 +274,7 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
     });
   }
 
-  // Add thumbnail if present
-  if (data.thumbnail) {
-    formData.append('thumbnail', data.thumbnail);
-  }
+  // Note: thumbnail will be uploaded separately after activity creation
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -267,6 +313,20 @@ export async function createActivity(data: CreateActivityRequest): Promise<void>
     error.status = response.status;
     throw error;
   }
+
+  const responseData = await response.json();
+  const activityId = responseData.id || responseData.activityId;
+
+  if (!activityId) {
+    throw new Error('ID da atividade não foi retornado pela API');
+  }
+
+  // Upload thumbnail separately if present
+  if (data.thumbnail) {
+    await uploadActivityThumbnail(activityId, data.thumbnail);
+  }
+
+  return activityId;
 }
 
 export interface ActivityDetail {
@@ -311,39 +371,28 @@ export interface UpdateActivityRequest {
   sendNow: boolean;
 }
 
-export async function updateActivity(activityId: number, data: UpdateActivityRequest): Promise<void> {
-  const formData = new FormData();
+export async function updateActivity(activityId: number, data: UpdateActivityRequest, send: boolean = false): Promise<void> {
+  // Format dates to YYYY-MM-DD
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-  formData.append('description', data.description);
-  formData.append('name', data.name);
-  formData.append('points', data.points.toString());
-  formData.append('validFrom', data.validFrom);
-  formData.append('validTo', data.validTo);
-  formData.append('sendNow', data.sendNow.toString());
-
-  // Add crop type IDs as array
-  data.cropTypeIds.forEach((id) => {
-    formData.append('cropTypeIds', id.toString());
-  });
-
-  // Add farm IDs as array (optional)
-  if (data.farmIds && data.farmIds.length > 0) {
-    data.farmIds.forEach((id) => {
-      formData.append('farmIds', id.toString());
-    });
-  }
-
-  // Add production unit IDs as array (optional)
-  if (data.productionUnitIds && data.productionUnitIds.length > 0) {
-    data.productionUnitIds.forEach((id) => {
-      formData.append('productionUnitIds', id.toString());
-    });
-  }
-
-  // Add thumbnail if present
-  if (data.thumbnail) {
-    formData.append('thumbnail', data.thumbnail);
-  }
+  const requestBody = {
+    description: data.description,
+    name: data.name,
+    points: data.points,
+    validFrom: formatDate(data.validFrom),
+    validTo: formatDate(data.validTo),
+    sendNow: data.sendNow,
+    thumbnailUrl: null,
+    cropTypeIds: data.cropTypeIds || [],
+    farmIds: data.farmIds || [],
+    productionUnitIds: data.productionUnitIds || [],
+  };
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -351,27 +400,16 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
 
   const { API_BASE_URL } = await import('@/services/auth.service');
 
-  const headers: HeadersInit = {};
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  const formDataLog: Record<string, unknown> = {};
-  formData.forEach((value, key) => {
-    if (formDataLog[key]) {
-      if (Array.isArray(formDataLog[key])) {
-        (formDataLog[key] as unknown[]).push(value);
-      } else {
-        formDataLog[key] = [formDataLog[key], value];
-      }
-    } else {
-      formDataLog[key] = value;
-    }
-  });
-
   const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}`, {
     method: 'PUT',
-    body: formData,
+    body: JSON.stringify(requestBody),
     headers,
   });
 
@@ -380,5 +418,14 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
     const error = new Error(errorData.message || 'Erro ao atualizar atividade') as Error & { status?: number };
     error.status = response.status;
     throw error;
+  }
+
+  // Upload thumbnail separately if present
+  if (data.thumbnail) {
+    await uploadActivityThumbnail(activityId, data.thumbnail);
+  }
+
+  if (send) {
+    await sendActtivity(activityId);
   }
 }
