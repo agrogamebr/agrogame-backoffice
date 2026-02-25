@@ -405,7 +405,7 @@ export function CreateActivityForm({
             variant="ghost"
             className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 sm:min-w-45"
           >
-            {isPendingDraft ? 'Salvando...' : 'Salvar rascunho'}
+            {isPendingDraft ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar rascunho'}
           </Button>
           <Button
             formAction={formActionSend}

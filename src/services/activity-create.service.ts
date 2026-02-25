@@ -91,11 +91,9 @@ export async function listProductionUnitsFiltered(
   farmIds: number[],
   cropTypeIds: number[]
 ): Promise<ProductionUnitResponse[]> {
-  console.log('listProductionUnitsFiltered called with:', { farmIds, cropTypeIds });
 
   // If no farms are selected, we shouldn't return any production units
   if (!farmIds || farmIds.length === 0) {
-    console.log('No farms selected, returning empty list');
     return [];
   }
 
@@ -115,12 +113,10 @@ export async function listProductionUnitsFiltered(
       }
 
       const url = `/api/backoffice/production-units/list?${params.toString()}`;
-      console.log(`Initialing fetch for: ${url}`);
 
       promises.push(
         apiFetch(url)
           .then(async (res) => {
-            console.log(`Response received for ${url}. Status: ${res.status}`);
 
             if (!res.ok) {
               const errorText = await res.text().catch(() => 'Failed to read error text');
@@ -130,18 +126,14 @@ export async function listProductionUnitsFiltered(
 
             try {
               const rawData = await res.json();
-              console.log(`Raw JSON response for ${url}:`, JSON.stringify(rawData, null, 2));
 
               let items: ProductionUnitResponse[] = [];
 
               if (Array.isArray(rawData)) {
-                console.log(`Response is direct array of length ${rawData.length}`);
                 items = rawData;
               } else if (rawData.content && Array.isArray(rawData.content)) {
-                console.log(`Response has 'content' array of length ${rawData.content.length}`);
                 items = rawData.content;
               } else if (rawData.items && Array.isArray(rawData.items)) {
-                console.log(`Response has 'items' array of length ${rawData.items.length}`);
                 items = rawData.items;
               } else {
                 console.warn(`Unexpected response structure for ${url}:`, rawData);
@@ -162,7 +154,6 @@ export async function listProductionUnitsFiltered(
   }
 
   const results = await Promise.all(promises);
-  console.log('All fetch results (before flattening):', results);
 
   // Flatten and deduplicate results
   const allUnits = results.flat();
@@ -178,7 +169,6 @@ export async function listProductionUnitsFiltered(
   });
 
   const finalUnits = Array.from(uniqueUnits.values());
-  console.log(`Final unique units returning: ${finalUnits.length}`, finalUnits);
 
   return finalUnits;
 }
@@ -225,6 +215,31 @@ export async function uploadActivityThumbnail(activityId: number, thumbnail: Fil
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     const error = new Error(errorData.message || 'Erro ao fazer upload do thumbnail') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+}
+
+export async function sendActtivity(activityId: number): Promise<void> {
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const { API_BASE_URL } = await import('@/services/auth.service');
+
+  const headers: HeadersInit = {};
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}/send`, {
+    method: 'PATCH',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao enviar atividade') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
@@ -356,7 +371,7 @@ export interface UpdateActivityRequest {
   sendNow: boolean;
 }
 
-export async function updateActivity(activityId: number, data: UpdateActivityRequest): Promise<void> {
+export async function updateActivity(activityId: number, data: UpdateActivityRequest, send: boolean = false): Promise<void> {
   // Format dates to YYYY-MM-DD
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -378,8 +393,6 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
     farmIds: data.farmIds || [],
     productionUnitIds: data.productionUnitIds || [],
   };
-
-  console.log('Body enviado para PUT /api/activity/${activityId}:', requestBody);
 
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
@@ -410,5 +423,9 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
   // Upload thumbnail separately if present
   if (data.thumbnail) {
     await uploadActivityThumbnail(activityId, data.thumbnail);
+  }
+
+  if (send) {
+    await sendActtivity(activityId);
   }
 }

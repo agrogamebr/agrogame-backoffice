@@ -267,7 +267,7 @@ async function updateActivityFromForm(activityId: number, formData: FormData) {
       farmIds: farmIds.length > 0 ? farmIds : undefined,
       productionUnitIds: productionUnitIds.length > 0 ? productionUnitIds : undefined,
       sendNow,
-    });
+    }, sendNow);
 
     redirect('/activities?success=Atividade atualizada com sucesso');
   } catch (e: unknown) {
