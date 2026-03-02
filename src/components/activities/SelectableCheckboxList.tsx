@@ -14,6 +14,7 @@ interface SelectableCheckboxListProps {
   inputName: string;
   defaultSelectedIds?: number[];
   onSelectionChange?: (selectedIds: number[]) => void;
+  disabled?: boolean;
 }
 
 export function SelectableCheckboxList({
@@ -23,6 +24,7 @@ export function SelectableCheckboxList({
   inputName,
   defaultSelectedIds = [],
   onSelectionChange,
+  disabled = false,
 }: SelectableCheckboxListProps) {
   const [filter, setFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
@@ -86,7 +88,8 @@ export function SelectableCheckboxList({
           placeholder={filterPlaceholder}
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
-          className="w-full px-3 py-2 border rounded-lg text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent"
+          disabled={disabled}
+          className="w-full px-3 py-2 border rounded-lg text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
         />
       </div>
       <div className="space-y-3 max-h-56 overflow-y-auto pr-2">
@@ -95,7 +98,8 @@ export function SelectableCheckboxList({
             type="checkbox"
             checked={isAllSelected}
             onChange={handleToggleAll}
-            className="h-4 w-4 rounded border-gray-300 text-[#0B63E5] focus:ring-[#0B63E5]"
+            disabled={disabled}
+            className="h-4 w-4 rounded border-gray-300 text-[#0B63E5] focus:ring-[#0B63E5] disabled:cursor-not-allowed"
           />
           <span className="font-semibold text-gray-800">
             {isAllSelected ? 'Desmarcar todos' : 'Selecionar todos'} ({items.length})
@@ -109,7 +113,8 @@ export function SelectableCheckboxList({
               value={item.id}
               checked={selectedIds.has(item.id)}
               onChange={() => handleToggleItem(item.id)}
-              className="h-4 w-4 rounded border-gray-300 text-[#0B63E5] focus:ring-[#0B63E5]"
+              disabled={disabled}
+              className="h-4 w-4 rounded border-gray-300 text-[#0B63E5] focus:ring-[#0B63E5] disabled:cursor-not-allowed"
             />
             <span>{item.label}</span>
           </label>

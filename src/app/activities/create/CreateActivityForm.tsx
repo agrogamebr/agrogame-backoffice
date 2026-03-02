@@ -17,6 +17,7 @@ interface CreateActivityFormProps {
   productionUnits: { id: number; label: string }[];
   isEditing?: boolean;
   initialActivity?: ActivityDetail | null;
+  isViewMode?: boolean;
 }
 
 function ErrorAlert({ errors }: { errors: Record<string, string> | null }) {
@@ -84,6 +85,7 @@ export function CreateActivityForm({
   productionUnits, // initial list
   isEditing = false,
   initialActivity = null,
+  isViewMode = false,
 }: CreateActivityFormProps) {
   const { addToast } = useToast();
 
@@ -243,7 +245,7 @@ export function CreateActivityForm({
           <span className="text-gray-400">&gt;</span>
           <span className="font-semibold text-gray-900">{pageTitle}</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{isViewMode ? 'Visualizar atividade' : pageTitle}</h1>
       </div>
 
       <ErrorAlert errors={errors || null} />
@@ -260,6 +262,7 @@ export function CreateActivityForm({
               helperText="A imagem deve ser em png 180x180px"
               name="activityImage"
               initialImageGsUri={initialActivity?.thumbnailGsutilUri}
+              disabled={isViewMode}
             />
 
             <Input
@@ -274,6 +277,7 @@ export function CreateActivityForm({
               defaultValue={defaultName}
               error={errors?.activityName}
               required
+              disabled={isViewMode}
             />
 
             <div className="space-y-2">
@@ -287,8 +291,9 @@ export function CreateActivityForm({
                 placeholder="Descreva a atividade"
                 defaultValue={defaultDescription}
                 required
+                disabled={isViewMode}
                 aria-invalid={!!errors?.activityDescription}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${errors?.activityDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 ${isViewMode ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'} ${errors?.activityDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                   }`}
               />
               {errors?.activityDescription && (
@@ -309,6 +314,7 @@ export function CreateActivityForm({
               defaultValue={defaultPoints}
               error={errors?.activityPoints}
               required
+              disabled={isViewMode}
             />
           </div>
         </SectionCard>
@@ -327,6 +333,7 @@ export function CreateActivityForm({
                 inputName="cropTypeIds"
                 defaultSelectedIds={selectedCropTypeIds}
                 onSelectionChange={setSelectedCropTypeIds}
+                disabled={isViewMode}
               />
               {errors?.cropTypeIds && (
                 <p className="mt-2 text-sm text-red-600">{errors.cropTypeIds}</p>
@@ -340,6 +347,7 @@ export function CreateActivityForm({
               inputName="farmIds"
               defaultSelectedIds={selectedFarmIds}
               onSelectionChange={setSelectedFarmIds}
+              disabled={isViewMode}
             />
 
             <div className={selectedFarmIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
@@ -349,6 +357,7 @@ export function CreateActivityForm({
                 items={availableProductionUnits}
                 inputName="productionUnitIds"
                 defaultSelectedIds={isEditing && initialActivity?.productionUnitIds ? initialActivity.productionUnitIds : undefined}
+                disabled={isViewMode}
               />
               {selectedFarmIds.length === 0 && (
                 <p className="text-xs text-gray-500 mt-1">Selecione uma fazenda para ver as unidades</p>
@@ -369,6 +378,7 @@ export function CreateActivityForm({
                   defaultValue={defaultValidFrom}
                   error={errors?.startDate}
                   required
+                  disabled={isViewMode}
                 />
               </div>
 
@@ -385,6 +395,7 @@ export function CreateActivityForm({
                   defaultValue={defaultValidTo}
                   error={errors?.endDate}
                   required
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -397,24 +408,28 @@ export function CreateActivityForm({
             className="text-sm font-semibold text-gray-600 hover:text-gray-900"
             tabIndex={isLoading ? -1 : undefined}
           >
-            Cancelar
+            {isViewMode ? 'Voltar' : 'Cancelar'}
           </Link>
-          <Button
-            formAction={formActionDraft}
-            disabled={isLoading}
-            variant="ghost"
-            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 sm:min-w-45"
-          >
-            {isPendingDraft ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar rascunho'}
-          </Button>
-          <Button
-            formAction={formActionSend}
-            disabled={isLoading}
-            variant="primary"
-            className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-[#0B63E5] text-white font-semibold hover:bg-[#0951bd] sm:min-w-55"
-          >
-            {isPendingSend ? 'Salvando...' : 'Salvar e enviar atividade'}
-          </Button>
+          {!isViewMode && (
+            <>
+              <Button
+                formAction={formActionDraft}
+                disabled={isLoading}
+                variant="ghost"
+                className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-white text-[#0B63E5] font-semibold hover:bg-blue-50 sm:min-w-45"
+              >
+                {isPendingDraft ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar rascunho'}
+              </Button>
+              <Button
+                formAction={formActionSend}
+                disabled={isLoading}
+                variant="primary"
+                className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-[#0B63E5] text-white font-semibold hover:bg-[#0951bd] sm:min-w-55"
+              >
+                {isPendingSend ? 'Salvando...' : 'Salvar e enviar atividade'}
+              </Button>
+            </>
+          )}
         </div>
       </form>
     </div>

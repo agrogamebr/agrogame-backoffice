@@ -9,6 +9,7 @@ interface ActivityImageUploadProps {
   name: string;
   accept?: string;
   initialImageGsUri?: string;
+  disabled?: boolean;
 }
 
 export function ActivityImageUpload({
@@ -17,6 +18,7 @@ export function ActivityImageUpload({
   name,
   accept = 'image/png,image/jpeg',
   initialImageGsUri,
+  disabled = false,
 }: ActivityImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,7 +68,7 @@ export function ActivityImageUpload({
   return (
     <div className="space-y-3">
       <label className="text-sm font-semibold text-gray-700">{label}</label>
-      <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+      <div className={`border border-dashed border-gray-300 rounded-lg p-4 text-center ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}`}>
         {previewUrl ? (
           <div className="space-y-3">
             <div className="relative w-full aspect-square max-w-45 mx-auto overflow-hidden rounded-lg bg-white">
@@ -86,7 +88,8 @@ export function ActivityImageUpload({
             <button
               type="button"
               onClick={handleSelectFile}
-              className="text-sm font-semibold text-[#0B63E5] hover:text-[#0951bd] cursor-pointer"
+              disabled={disabled}
+              className="text-sm font-semibold text-[#0B63E5] hover:text-[#0951bd] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selecionar nova imagem
             </button>
@@ -95,7 +98,8 @@ export function ActivityImageUpload({
           <button
             type="button"
             onClick={handleSelectFile}
-            className="w-full text-sm font-semibold text-gray-600 hover:text-[#0B63E5] cursor-pointer"
+            disabled={disabled}
+            className="w-full text-sm font-semibold text-gray-600 hover:text-[#0B63E5] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Upload da imagem
           </button>
@@ -106,6 +110,7 @@ export function ActivityImageUpload({
           name={name}
           accept={accept}
           onChange={handleFileChange}
+          disabled={disabled}
           className="hidden"
           aria-label={label}
         />

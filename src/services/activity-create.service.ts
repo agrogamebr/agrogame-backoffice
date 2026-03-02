@@ -220,7 +220,7 @@ export async function uploadActivityThumbnail(activityId: number, thumbnail: Fil
   }
 }
 
-export async function sendActtivity(activityId: number): Promise<void> {
+export async function sendActivity(activityId: number): Promise<void> {
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
@@ -426,6 +426,6 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
   }
 
   if (send) {
-    await sendActtivity(activityId);
+    await sendActivity(activityId);
   }
 }
