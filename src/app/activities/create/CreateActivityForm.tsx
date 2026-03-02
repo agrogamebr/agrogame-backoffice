@@ -346,10 +346,13 @@ export function CreateActivityForm({
                 </span>
               }
               type="number"
+              min="0"
               placeholder="0"
               name="activityPoints"
               defaultValue={defaultPoints}
               error={errors?.activityPoints}
+              helperText="A pontuação deve ser um número positivo"
+              validationMessage="Por favor, insira uma pontuação válida (número positivo)"
               required
               disabled={isViewMode}
             />
