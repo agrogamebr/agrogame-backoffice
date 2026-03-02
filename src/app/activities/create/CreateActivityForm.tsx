@@ -280,9 +280,9 @@ export function CreateActivityForm({
             Gerenciamento de atividades
           </Link>
           <span className="text-gray-400">&gt;</span>
-          <span className="font-semibold text-gray-900">{pageTitle}</span>
+          <span className="font-extrabold text-gray-900">{pageTitle}</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">{isViewMode ? 'Visualizar atividade' : pageTitle}</h1>
+        {/* <h1 className="text-2xl font-bold text-gray-900">{isViewMode ? 'Visualizar atividade' : pageTitle}</h1> */}
       </div>
 
       <ErrorAlert errors={errors || null} />

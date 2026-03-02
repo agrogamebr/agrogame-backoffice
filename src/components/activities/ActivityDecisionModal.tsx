@@ -58,9 +58,9 @@ export function ActivityDecisionModal({
 
       onSave();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error submitting decision:', err);
-      setError(err.message || 'Ocorreu um erro ao salvar a decisão. Tente novamente.');
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar a decisão. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +77,7 @@ export function ActivityDecisionModal({
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">
-            Atividade | {submission.activityName}
+            {submission.activityName}
           </h2>
           <Button
             onClick={onClose}
@@ -100,7 +100,7 @@ export function ActivityDecisionModal({
 
           <div>
             <Badge variant="fazenda">
-              Fazenda {submission.farmName}
+              {submission.farmName}
             </Badge>
           </div>
 
