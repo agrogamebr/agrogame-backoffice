@@ -7,13 +7,28 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string | React.ReactNode;
   error?: string;
   isPassword?: boolean;
+  helperText?: string;
+  validationMessage?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = '', label, error, isPassword, type = 'text', id, ...props }, ref) => {
+  ({ className = '', label, error, isPassword, type = 'text', id, helperText, validationMessage, onInvalid, onChange, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+
+    const handleInvalid = (e: React.InvalidEvent<HTMLInputElement>) => {
+      if (validationMessage) {
+        (e.target as HTMLInputElement).setCustomValidity(validationMessage);
+      }
+      onInvalid?.(e);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Limpa a mensagem customizada quando o usuário começa a digitar
+      (e.target as HTMLInputElement).setCustomValidity('');
+      onChange?.(e);
+    };
 
     return (
       <div className="w-full">
@@ -32,6 +47,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             type={inputType}
             className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
               } ${isPassword ? 'pr-12' : ''} ${className}`}
+            onInvalid={handleInvalid}
+            onChange={handleChange}
             {...props}
           />
           {isPassword && (
@@ -51,6 +68,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
         {error && (
           <p className="mt-1 text-sm text-red-500">{error}</p>
+        )}
+        {!error && helperText && (
+          <p className="mt-1 text-sm text-gray-500">{helperText}</p>
         )}
       </div>
     );

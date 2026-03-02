@@ -1,7 +1,7 @@
 'use server';
 
 import { apiFetch } from '@/lib/api';
-import { createActivity, updateActivity } from '@/services/activity-create.service';
+import { createActivity, updateActivity, sendActivity as sendActivityService } from '@/services/activity-create.service';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -32,6 +32,23 @@ export async function cancelActivity(activityId: number | string): Promise<void>
     const errorData = await response.json().catch(() => ({}));
     const error = new Error(errorData.message || 'Erro ao cancelar atividade') as Error & { status?: number };
     error.status = response.status;
+    throw error;
+  }
+}
+
+export async function sendActivity(activityId: number | string): Promise<void> {
+  try {
+    await sendActivityService(Number(activityId));
+  } catch (e: unknown) {
+    const error = e as { message?: string; status?: number };
+    
+    if (error.message === 'Token JWT ausente ou inválido' || error.message === 'Unauthorized' || error.status === 401) {
+      const cookieStore = await cookies();
+      cookieStore.delete('token');
+      cookieStore.delete('user_info');
+      redirect(`/login?error=${encodeURIComponent(error.message || 'Erro desconhecido')}`);
+    }
+
     throw error;
   }
 }

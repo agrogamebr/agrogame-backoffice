@@ -1,7 +1,7 @@
 'use server';
 
 import { CreateActivityForm } from './CreateActivityForm';
-import { listCropTypes, listFarms, listProductionUnits, getActivityById, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
+import { listCropTypes, listFarms, getActivityById, ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
 
 import { redirect } from 'next/navigation';
 
@@ -52,6 +52,11 @@ export default async function CreateActivityPage({
     console.error(error);
   }
 
+  // Determine view mode based on activity status (server-side security)
+  const isViewMode = initialActivity ? 
+    (initialActivity.status === 'send' || initialActivity.status === 'completed' || initialActivity.status === 'canceled') 
+    : false;
+
   return (
     <CreateActivityForm
       cropTypes={cropTypes}
@@ -59,6 +64,7 @@ export default async function CreateActivityPage({
       productionUnits={productionUnits}
       isEditing={!!activityId}
       initialActivity={initialActivity}
+      isViewMode={isViewMode}
     />
   );
 }

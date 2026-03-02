@@ -111,7 +111,6 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       </div>
 
       <div className="space-y-4">
-        {/* Table / Empty State */}
         {hasActivities ? (
           <ActivitiesTable
             activities={activities}

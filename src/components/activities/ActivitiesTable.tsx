@@ -2,14 +2,15 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Pencil, Trash2, Send } from 'lucide-react';
+import { Pencil, Trash2, Send, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import ConfirmModal from '@/components/ConfirmModal';
-import { cancelActivity } from '@/app/actions/activity';
+import { cancelActivity, sendActivity } from '@/app/actions/activity';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 
 export type ActivityStatus = 'Enviado' | 'Rascunho' | 'Excluída' | 'Completado' | 'Cancelado';
 export type ActivityStatusCode = 'draft' | 'send' | 'deleted' | 'completed' | 'canceled';
@@ -49,9 +50,13 @@ export function ActivitiesTable({
 }: ActivitiesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { addToast } = useToast();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activityToCancel, setActivityToCancel] = useState<Activity | null>(null);
   const [isCancelling, startCancelTransition] = useTransition();
+  const [isConfirmSendOpen, setIsConfirmSendOpen] = useState(false);
+  const [activityToSend, setActivityToSend] = useState<Activity | null>(null);
+  const [isSending, startSendTransition] = useTransition();
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
@@ -92,9 +97,29 @@ export function ActivitiesTable({
     });
   };
 
-  const handleSend = (id: string) => {
-    console.log('Send', id);
-    // TODO: Implement send logic
+  const handleSendClick = (activity: Activity) => {
+    setActivityToSend(activity);
+    setIsConfirmSendOpen(true);
+  };
+
+  const handleSendConfirm = () => {
+    if (!activityToSend) return;
+
+    startSendTransition(async () => {
+      try {
+        await sendActivity(activityToSend.id);
+        setIsConfirmSendOpen(false);
+        setActivityToSend(null);
+        addToast('Atividade enviada com sucesso', 'success', 5000);
+        router.refresh();
+      } catch (error) {
+        console.error('Failed to send activity', error);
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar atividade';
+        setIsConfirmSendOpen(false);
+        setActivityToSend(null);
+        addToast(errorMessage, 'error', 5000);
+      }
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -151,9 +176,13 @@ export function ActivitiesTable({
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
-                      title="Editar"
+                      title={activity.statusCode === 'send' ? 'Visualizar' : 'Editar'}
                     >
-                      <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                      {activity.statusCode === 'send' ? (
+                        <Eye className="w-4 h-4 text-[#0B63E5]" />
+                      ) : (
+                        <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                      )}
                     </Button>
                   )}
 
@@ -171,11 +200,12 @@ export function ActivitiesTable({
 
                   {showSendButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleSend(activity.id)}
+                      onClick={() => handleSendClick(activity)}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
                       title="Enviar"
+                      disabled={isSending}
                     >
                       <Send className="w-4 h-4 text-[#00C448]" />
                     </Button>
@@ -211,6 +241,26 @@ export function ActivitiesTable({
           }
         }}
         onConfirm={handleCancelConfirm}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmSendOpen}
+        title="Enviar atividade"
+        description={
+          activityToSend 
+            ? `Deseja enviar a atividade "${activityToSend.name}"? Após o envio, a atividade não poderá mais ser modificada. Tem certeza?`
+            : 'Deseja enviar esta atividade? Após o envio, a atividade não poderá mais ser modificada. Tem certeza?'
+        }
+        confirmLabel="Sim, enviar"
+        cancelLabel="Cancelar"
+        isConfirming={isSending}
+        onClose={() => {
+          if (!isSending) {
+            setIsConfirmSendOpen(false);
+            setActivityToSend(null);
+          }
+        }}
+        onConfirm={handleSendConfirm}
       />
     </div>
   );
