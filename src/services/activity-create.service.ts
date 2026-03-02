@@ -14,7 +14,11 @@ export interface CropTypesListResponse {
 export interface FarmResponse {
   id: number;
   name: string;
-  ownerId: number;
+  ownerId?: number;
+  city?: string;
+  state?: string;
+  active?: boolean;
+  thumbnailGsUrl?: string | null;
 }
 
 export interface ProductionUnitResponse {
@@ -68,6 +72,35 @@ export async function listFarms(): Promise<FarmResponse[]> {
   }
 
   console.warn('Unexpected farms response structure:', data);
+  return [];
+}
+
+export async function listFarmsByCropTypes(cropTypeIds: number[]): Promise<FarmResponse[]> {
+  if (!cropTypeIds || cropTypeIds.length === 0) {
+    return [];
+  }
+
+  const params = new URLSearchParams();
+  cropTypeIds.forEach(id => {
+    params.append('cropTypeIds', id.toString());
+  });
+
+  const response = await apiFetch(`/api/farms/by-crop-types?${params.toString()}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao carregar fazendas') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+
+  if (data.farms && Array.isArray(data.farms)) {
+    return data.farms.filter((farm: FarmResponse) => farm.active !== false);
+  }
+
+  console.warn('Unexpected farms by crop types response structure:', data);
   return [];
 }
 

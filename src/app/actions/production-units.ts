@@ -1,6 +1,6 @@
 'use server';
 
-import { listProductionUnitsFiltered } from '@/services/activity-create.service';
+import { listProductionUnitsFiltered, listFarmsByCropTypes } from '@/services/activity-create.service';
 
 export async function getProductionUnitsAction(farmIds: number[], cropTypeIds: number[]) {
   try {
@@ -9,5 +9,15 @@ export async function getProductionUnitsAction(farmIds: number[], cropTypeIds: n
   } catch (error: unknown) {
     console.error('Error in getProductionUnitsAction:', error);
     return { success: false, error: 'Failed to fetch production units', data: [] };
+  }
+}
+
+export async function getFarmsByCropTypesAction(cropTypeIds: number[]) {
+  try {
+    const farms = await listFarmsByCropTypes(cropTypeIds);
+    return { success: true, data: farms };
+  } catch (error: unknown) {
+    console.error('Error in getFarmsByCropTypesAction:', error);
+    return { success: false, error: 'Failed to fetch farms', data: [] };
   }
 }

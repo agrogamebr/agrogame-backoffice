@@ -7,8 +7,8 @@ import { ActivityImageUpload } from '@/components/activities/ActivityImageUpload
 import { SelectableCheckboxList } from '@/components/activities/SelectableCheckboxList';
 import { saveActivityDraft, saveAndSendActivity, saveActivityDraftEdit, saveAndSendActivityEdit } from '@/app/actions/activity';
 import { useToast } from '@/components/ui/Toast';
-import { ActivityDetail, ProductionUnitResponse } from '@/services/activity-create.service';
-import { getProductionUnitsAction } from '@/app/actions/production-units';
+import { ActivityDetail, ProductionUnitResponse, FarmResponse } from '@/services/activity-create.service';
+import { getProductionUnitsAction, getFarmsByCropTypesAction } from '@/app/actions/production-units';
 import { Button } from '@/components/ui/Button';
 
 interface CreateActivityFormProps {
@@ -96,6 +96,8 @@ export function CreateActivityForm({
   // Local state for tracking selections to filter production units
   const [selectedFarmIds, setSelectedFarmIds] = useState<number[]>(isEditing && initialActivity?.farmIds ? initialActivity.farmIds : []);
   const [selectedCropTypeIds, setSelectedCropTypeIds] = useState<number[]>(isEditing && initialActivity?.cropTypeIds ? initialActivity.cropTypeIds : []);
+  const [availableFarms, setAvailableFarms] = useState<{ id: number; label: string }[]>(farms);
+  const [loadingFarms, setLoadingFarms] = useState(false);
   const [availableProductionUnits, setAvailableProductionUnits] = useState<{ id: number; label: string }[]>(productionUnits);
   const [loadingProductionUnits, setLoadingProductionUnits] = useState(false);
 
@@ -194,6 +196,41 @@ export function CreateActivityForm({
       addToast(firstError || 'Erro ao validar formulário', 'error');
     }
   }, [errors, addToast]);
+
+  // Fetch farms when crop types change
+  useEffect(() => {
+    async function fetchFarms() {
+      if (selectedCropTypeIds.length === 0) {
+        setAvailableFarms(farms);
+        setSelectedFarmIds([]);
+        return;
+      }
+
+      setLoadingFarms(true);
+      try {
+        const response = await getFarmsByCropTypesAction(selectedCropTypeIds);
+        if (response.success && response.data) {
+          setAvailableFarms(response.data.map((f: FarmResponse) => ({ id: f.id, label: f.name })));
+          // Clear selected farms that are not in the new filtered list
+          const newFarmIds = response.data.map((f: FarmResponse) => f.id);
+          setSelectedFarmIds(prev => prev.filter(id => newFarmIds.includes(id)));
+        } else {
+          console.error("Action returned error or empty data");
+          setAvailableFarms([]);
+          setSelectedFarmIds([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch farms", error);
+        addToast("Erro ao carregar fazendas", "error");
+        setAvailableFarms([]);
+        setSelectedFarmIds([]);
+      } finally {
+        setLoadingFarms(false);
+      }
+    }
+
+    fetchFarms();
+  }, [selectedCropTypeIds, farms, addToast]);
 
   // Fetch production units when farms or crops change
   useEffect(() => {
@@ -340,15 +377,20 @@ export function CreateActivityForm({
               )}
             </div>
 
-            <SelectableCheckboxList
-              title="Fazendas"
-              filterPlaceholder="Filtrar fazendas"
-              items={farms}
-              inputName="farmIds"
-              defaultSelectedIds={selectedFarmIds}
-              onSelectionChange={setSelectedFarmIds}
-              disabled={isViewMode}
-            />
+            <div className={selectedCropTypeIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
+              <SelectableCheckboxList
+                title={loadingFarms ? "Fazendas (Carregando...)" : "Fazendas"}
+                filterPlaceholder="Filtrar fazendas"
+                items={availableFarms}
+                inputName="farmIds"
+                defaultSelectedIds={selectedFarmIds}
+                onSelectionChange={setSelectedFarmIds}
+                disabled={isViewMode}
+              />
+              {selectedCropTypeIds.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">Selecione uma cultura para ver as fazendas</p>
+              )}
+            </div>
 
             <div className={selectedFarmIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
               <SelectableCheckboxList
