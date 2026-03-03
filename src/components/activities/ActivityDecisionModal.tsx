@@ -21,7 +21,7 @@ export function ActivityDecisionModal({
   onClose,
   onSave
 }: ActivityDecisionModalProps) {
-  const [status, setStatus] = useState<string>(submission.status === 'submitted' ? '' : submission.status);
+  const [decision, setDecision] = useState<'approved' | 'rejected' | ''>('');
   const [justification, setJustification] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,14 @@ export function ActivityDecisionModal({
   // Reset state when submission changes or modal opens
   useEffect(() => {
     if (isOpen) {
-      setStatus(submission.status === 'submitted' ? '' : submission.status);
+      // Map existing status to decision if activity already has a decision
+      if (submission.status === 'approved') {
+        setDecision('approved');
+      } else if (submission.status === 'rejected') {
+        setDecision('rejected');
+      } else {
+        setDecision('');
+      }
       setJustification('');
       setError(null);
     }
@@ -38,7 +45,7 @@ export function ActivityDecisionModal({
   if (!isOpen) return null;
 
   const isReadOnly = submission.status !== 'submitted';
-  const isValid = status === 'approved' || (status === 'rejected' && justification.trim().length > 0);
+  const isValid = decision === 'approved' || (decision === 'rejected' && justification.trim().length > 0);
 
   const handleSave = async () => {
     if (!isValid || isReadOnly) return;
@@ -48,8 +55,8 @@ export function ActivityDecisionModal({
       setError(null);
 
       const result = await submitDecisionAction(submission.userActivityId, {
-        decision: status as 'approved' | 'rejected',
-        reason: status === 'rejected' ? justification : undefined
+        decision: decision as 'approved' | 'rejected',
+        reason: decision === 'rejected' ? justification : undefined
       });
 
       if (!result.success) {
@@ -135,38 +142,73 @@ export function ActivityDecisionModal({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="status" className="block text-sm font-normal text-gray-500 mb-2 leading-none tracking-[0.02em] font-sans">
-                Status da atividade
+              <label className="block text-sm font-normal text-gray-500 mb-3 leading-none tracking-[0.02em] font-sans">
+                Decisão
               </label>
-              <select
-                id="status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                disabled={isReadOnly || isSubmitting}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
-              >
-                <option value="submitted">Pendente</option>
-                <option value="approved">Aprovado</option>
-                <option value="rejected">Rejeitado</option>
-              </select>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="radio"
+                      name="decision"
+                      value="approved"
+                      checked={decision === 'approved'}
+                      onChange={(e) => setDecision(e.target.value as 'approved')}
+                      disabled={isReadOnly || isSubmitting}
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-green-500 peer-checked:border-green-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed transition-colors flex items-center justify-center">
+                      {decision === 'approved' && (
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700">Aprovar atividade</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="radio"
+                      name="decision"
+                      value="rejected"
+                      checked={decision === 'rejected'}
+                      onChange={(e) => setDecision(e.target.value as 'rejected')}
+                      disabled={isReadOnly || isSubmitting}
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-red-500 peer-checked:border-red-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed transition-colors flex items-center justify-center">
+                      {decision === 'rejected' && (
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700">Rejeitar atividade</span>
+                </label>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="justification" className="block text-sm font-normal text-gray-500 mb-2 leading-none tracking-[0.02em] font-sans">
-                Justificativa {status === 'rejected' && <span className="text-red-500">*</span>}
-              </label>
-              <textarea
-                id="justification"
-                value={justification}
-                onChange={(e) => setJustification(e.target.value)}
-                disabled={isReadOnly || isSubmitting}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-[80px] bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
-                rows={3}
-                placeholder={status === 'rejected' ? 'Informe o motivo da rejeição' : ''}
-              />
-            </div>
+            {decision === 'rejected' && (
+              <div>
+                <label htmlFor="justification" className="block text-sm font-normal text-gray-500 mb-2 leading-none tracking-[0.02em] font-sans">
+                  Justificativa <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="justification"
+                  value={justification}
+                  onChange={(e) => setJustification(e.target.value)}
+                  disabled={isReadOnly || isSubmitting}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20 bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                  rows={3}
+                  placeholder="Informe o motivo da rejeição"
+                />
+              </div>
+            )}
           </div>
         </div>
 
