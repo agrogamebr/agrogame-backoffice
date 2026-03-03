@@ -79,7 +79,11 @@ export function CompletedActivitiesTable({
           </TableHeader>
           <TableBody>
             {submissions.map((submission) => (
-              <TableRow key={submission.userActivityId}>
+              <TableRow 
+                key={submission.userActivityId}
+                onClick={() => handleOpenModal(submission)}
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+              >
                 <TableCell className="font-medium text-gray-900">
                   {submission.activityName}
                 </TableCell>
@@ -101,7 +105,10 @@ export function CompletedActivitiesTable({
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
                     <Button
-                      onClick={() => handleOpenModal(submission)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(submission);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:bg-blue-50"

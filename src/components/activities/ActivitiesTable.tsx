@@ -153,7 +153,11 @@ export function ActivitiesTable({
         </TableHeader>
         <TableBody>
           {activities.map((activity) => (
-            <TableRow key={activity.rowKey}>
+            <TableRow 
+              key={activity.rowKey}
+              onClick={() => handleEdit(activity.id)}
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <TableCell>
                 <Badge variant={statusBadgeVariant[activity.status]}>
                   {activity.status}
@@ -172,7 +176,10 @@ export function ActivitiesTable({
                 <div className="flex items-center justify-center gap-2">
                   {showEditButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleEdit(activity.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(activity.id);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
@@ -188,7 +195,10 @@ export function ActivitiesTable({
 
                   {showCancelButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleCancelClick(activity)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelClick(activity);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
@@ -200,7 +210,10 @@ export function ActivitiesTable({
 
                   {showSendButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleSendClick(activity)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSendClick(activity);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
