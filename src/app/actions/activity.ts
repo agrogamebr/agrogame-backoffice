@@ -93,6 +93,8 @@ function validateActivityForm(formData: FormData): { valid: boolean; errors: Rec
   const validFrom = formData.get('startDate') as string;
   const validTo = formData.get('endDate') as string;
   const cropTypeIds = formData.getAll('cropTypeIds').map((id) => parseInt(id as string, 10));
+  const farmIds = formData.getAll('farmIds').map((id) => parseInt(id as string, 10));
+  const productionUnitIds = formData.getAll('productionUnitIds').map((id) => parseInt(id as string, 10));
 
   // Validate name
   if (!name) {
@@ -145,9 +147,9 @@ function validateActivityForm(formData: FormData): { valid: boolean; errors: Rec
     }
   }
 
-  // Validate crop types - FIX: Check for actual values
-  if (cropTypeIds.length === 0) {
-    errors.cropTypeIds = `Selecione pelo menos uma ${fieldLabels.cropTypeIds}`;
+  // Validate that at least one of: cropTypeIds, farmIds, or productionUnitIds is selected
+  if (cropTypeIds.length === 0 && farmIds.length === 0 && productionUnitIds.length === 0) {
+    errors.cropTypeIds = `Selecione pelo menos uma ${fieldLabels.cropTypeIds}, ${fieldLabels.farmIds} ou ${fieldLabels.productionUnitIds}`;
   }
 
   return {

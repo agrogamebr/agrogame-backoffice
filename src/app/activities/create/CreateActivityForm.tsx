@@ -36,7 +36,7 @@ function ErrorAlert({ errors }: { errors: Record<string, string> | null }) {
           </svg>
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-red-800 mb-2">Erro ao validar formulário</h3>
+          <h3 className="text-sm font-medium text-red-800 mb-2">Erro ao salvar alterações</h3>
           <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
             {Object.entries(errors).map(([_field, message]) => (
               <li key={_field}>{message}</li>
@@ -193,7 +193,7 @@ export function CreateActivityForm({
   useEffect(() => {
     if (errors && Object.keys(errors).length > 0) {
       const firstError = Object.values(errors)[0];
-      addToast(firstError || 'Erro ao validar formulário', 'error');
+      addToast(firstError || 'Erro ao salvar alterações:', 'error');
     }
   }, [errors, addToast]);
 
@@ -202,7 +202,6 @@ export function CreateActivityForm({
     async function fetchFarms() {
       if (selectedCropTypeIds.length === 0) {
         setAvailableFarms(farms);
-        setSelectedFarmIds([]);
         return;
       }
 
@@ -363,11 +362,7 @@ export function CreateActivityForm({
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_1fr_220px] gap-6">
             <div>
               <SelectableCheckboxList
-                title={
-                  <span>
-                    Cultura <RequiredIndicator />
-                  </span>
-                }
+                title="Cultura"
                 filterPlaceholder="Filtrar cultura"
                 items={cropTypes}
                 inputName="cropTypeIds"
@@ -380,7 +375,7 @@ export function CreateActivityForm({
               )}
             </div>
 
-            <div className={selectedCropTypeIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
+            <div>
               <SelectableCheckboxList
                 title={loadingFarms ? "Fazendas (Carregando...)" : "Fazendas"}
                 filterPlaceholder="Filtrar fazendas"
@@ -390,9 +385,6 @@ export function CreateActivityForm({
                 onSelectionChange={setSelectedFarmIds}
                 disabled={isViewMode}
               />
-              {selectedCropTypeIds.length === 0 && (
-                <p className="text-xs text-gray-500 mt-1">Selecione uma cultura para ver as fazendas</p>
-              )}
             </div>
 
             <div className={selectedFarmIds.length === 0 ? "opacity-50 pointer-events-none" : ""}>
