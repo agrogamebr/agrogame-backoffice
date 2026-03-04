@@ -135,9 +135,9 @@ export function ActivitiesTable({
     return statusCode === 'draft';
   };
 
-  const showEditButton = (statusCode: ActivityStatusCode) => {
-    return statusCode !== 'canceled';
-  }
+  const isViewOnly = (statusCode: ActivityStatusCode) => {
+    return statusCode === 'send' || statusCode === 'canceled';
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm">
@@ -170,21 +170,19 @@ export function ActivitiesTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {showEditButton(activity.statusCode) && (
-                    <Button
-                      onClick={() => handleEdit(activity.id)}
-                      variant="ghost"
-                      size="icon"
-                      className="hover:scale-110"
-                      title={activity.statusCode === 'send' ? 'Visualizar' : 'Editar'}
-                    >
-                      {activity.statusCode === 'send' ? (
-                        <Eye className="w-4 h-4 text-[#0B63E5]" />
-                      ) : (
-                        <Pencil className="w-4 h-4 text-[#0B63E5]" />
-                      )}
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => handleEdit(activity.id)}
+                    variant="ghost"
+                    size="icon"
+                    className="hover:scale-110"
+                    title={isViewOnly(activity.statusCode) ? 'Visualizar' : 'Editar'}
+                  >
+                    {isViewOnly(activity.statusCode) ? (
+                      <Eye className="w-4 h-4 text-[#0B63E5]" />
+                    ) : (
+                      <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                    )}
+                  </Button>
 
                   {showCancelButton(activity.statusCode) && (
                     <Button

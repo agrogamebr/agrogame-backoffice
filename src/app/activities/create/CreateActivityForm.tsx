@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 import { ActivityDetail, ProductionUnitResponse, FarmResponse } from '@/services/activity-create.service';
 import { getProductionUnitsAction, getFarmsByCropTypesAction } from '@/app/actions/production-units';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 interface CreateActivityFormProps {
   cropTypes: { id: number; label: string }[];
@@ -48,13 +49,18 @@ function ErrorAlert({ errors }: { errors: Record<string, string> | null }) {
   );
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({ title, children, rightContent }: { title: string; children: React.ReactNode; rightContent?: React.ReactNode }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
           {title}
         </h2>
+        {rightContent && (
+          <div className="flex items-center">
+            {rightContent}
+          </div>
+        )}
       </div>
       <div className="p-6">
         {children}
@@ -262,8 +268,30 @@ export function CreateActivityForm({
     fetchUnits();
   }, [selectedFarmIds, selectedCropTypeIds, addToast]);
 
+  const getStatusBadge = (status: string): { variant: 'enviado' | 'rascunho' | 'excluida' | 'completado' | 'cancelado'; label: string } | null => {
+    switch (status?.toLowerCase()) {
+      case 'send':
+      case 'enviado':
+        return { variant: 'enviado', label: 'Enviado' };
+      case 'draft':
+      case 'rascunho':
+        return { variant: 'rascunho', label: 'Rascunho' };
+      case 'deleted':
+      case 'excluida':
+        return { variant: 'excluida', label: 'Excluída' };
+      case 'completed':
+      case 'completado':
+        return { variant: 'completado', label: 'Completado' };
+      case 'canceled':
+      case 'cancelado':
+        return { variant: 'cancelado', label: 'Cancelado' };
+      default:
+        return null;
+    }
+  };
 
   const pageTitle = isEditing ? 'Editar atividade' : 'Criar atividade';
+  const statusBadge = isEditing && initialActivity ? getStatusBadge(initialActivity.status) : null;
 
   // Set up default values for form fields
   const defaultName = previousValues?.name || initialActivity?.name || '';
@@ -292,7 +320,14 @@ export function CreateActivityForm({
           <input type="hidden" name="activityId" value={initialActivity.id} />
         )}
 
-        <SectionCard title="Informações da atividade">
+        <SectionCard 
+          title="Informações da atividade"
+          rightContent={statusBadge ? (
+            <Badge variant={statusBadge.variant}>
+              {statusBadge.label}
+            </Badge>
+          ) : undefined}
+        >
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1.2fr_180px] gap-6 items-start">
             <ActivityImageUpload
               label="Imagem da atividade"
