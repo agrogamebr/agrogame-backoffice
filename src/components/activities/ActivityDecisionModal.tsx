@@ -82,20 +82,25 @@ export function ActivityDecisionModal({
         className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">
-            {submission.activityName}
-          </h2>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-gray-600 h-auto p-0"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Button>
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              {submission.activityName}
+            </h2>
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="icon"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 h-8 w-8 rounded-full bg-gray-50 p-0"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Button>
+          </div>
+          <Badge variant="fazenda">
+            {submission.farmName}
+          </Badge>
         </div>
 
         <div className="p-6 space-y-5">
@@ -106,18 +111,14 @@ export function ActivityDecisionModal({
           )}
 
           <div>
-            <Badge variant="fazenda">
-              {submission.farmName}
-            </Badge>
-          </div>
-
-          <div>
             <h3 className="text-sm font-normal text-gray-500 mb-2 leading-none tracking-[0.02em] font-sans">
               Descrição da atividade
             </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {submission.description}
-            </p>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {submission.description}
+              </p>
+            </div>
           </div>
 
           {submission.files && submission.files.length > 0 && (
