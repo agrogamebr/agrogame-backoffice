@@ -135,6 +135,10 @@ export function ActivitiesTable({
     return statusCode === 'draft';
   };
 
+  const showEditButton = (statusCode: ActivityStatusCode) => {
+    return statusCode !== 'canceled';
+  }
+
   const isViewOnly = (statusCode: ActivityStatusCode) => {
     return statusCode === 'send' || statusCode === 'canceled';
   };
