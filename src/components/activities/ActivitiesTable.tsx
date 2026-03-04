@@ -153,7 +153,11 @@ export function ActivitiesTable({
         </TableHeader>
         <TableBody>
           {activities.map((activity) => (
-            <TableRow key={activity.rowKey}>
+            <TableRow 
+              key={activity.rowKey}
+              onClick={() => handleEdit(activity.id)}
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <TableCell>
                 <Badge variant={statusBadgeVariant[activity.status]}>
                   {activity.status}
@@ -170,23 +174,31 @@ export function ActivitiesTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  <Button
-                    onClick={() => handleEdit(activity.id)}
-                    variant="ghost"
-                    size="icon"
-                    className="hover:scale-110"
-                    title={isViewOnly(activity.statusCode) ? 'Visualizar' : 'Editar'}
-                  >
-                    {isViewOnly(activity.statusCode) ? (
-                      <Eye className="w-4 h-4 text-[#0B63E5]" />
-                    ) : (
-                      <Pencil className="w-4 h-4 text-[#0B63E5]" />
-                    )}
-                  </Button>
+                  {showEditButton(activity.statusCode) && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(activity.id);
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      className="hover:scale-110"
+                      title={activity.statusCode === 'send' ? 'Visualizar' : 'Editar'}
+                    >
+                      {activity.statusCode === 'send' ? (
+                        <Eye className="w-4 h-4 text-[#0B63E5]" />
+                      ) : (
+                        <Pencil className="w-4 h-4 text-[#0B63E5]" />
+                      )}
+                    </Button>
+                  )}
 
                   {showCancelButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleCancelClick(activity)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelClick(activity);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
@@ -198,7 +210,10 @@ export function ActivitiesTable({
 
                   {showSendButton(activity.statusCode) && (
                     <Button
-                      onClick={() => handleSendClick(activity)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSendClick(activity);
+                      }}
                       variant="ghost"
                       size="icon"
                       className="hover:scale-110"
