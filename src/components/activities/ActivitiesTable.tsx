@@ -139,6 +139,10 @@ export function ActivitiesTable({
     return statusCode !== 'canceled';
   }
 
+  const isViewOnly = (statusCode: ActivityStatusCode) => {
+    return statusCode === 'send' || statusCode === 'canceled';
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm">
       <Table>
