@@ -3,11 +3,15 @@ import { EmptyState } from '@/components/activities/EmptyState';
 import { ProducersTable, Producer, ProducerStatus } from '@/components/producers/ProducersTable';
 import { listProducers } from '@/services/producers.service';
 import { redirect } from 'next/navigation';
+import { STATUS_DISPLAY, ProducerStatusId } from '@/types/producer-status';
 
 const statusMapping: Record<string, ProducerStatus> = {
   'Aprovado': 'Ativo',
-  'Reprovado': 'Inativo',
+  'Ativo': 'Ativo',
   'Pendente': 'Pendente',
+  'Rejeitado': 'Inativo',
+  'Inativo': 'Inativo',
+  'Suspenso': 'Inativo',
 };
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; name?: string; cpf?: string; statusId?: string }> }) {
@@ -30,14 +34,17 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   try {
     const producersResponse = await listProducers(page, size, filters);
 
-    producers = producersResponse.content.map(p => ({
-      userId: p.userId,
-      name: p.fullName,
-      cpf: p.cpf || 'N/A',
-      status: statusMapping[p.statusName] || 'Pendente',
-      statusCode: p.statusName.toLowerCase() as 'active' | 'inactive' | 'pending',
-      createdAt: p.createdAt,
-    }));
+    producers = producersResponse.content.map(p => {
+      const statusDisplay = STATUS_DISPLAY[p.statusId as ProducerStatusId] || 'Pendente';
+      return {
+        userId: p.userId,
+        name: p.fullName,
+        cpf: p.cpf || 'N/A',
+        status: statusMapping[statusDisplay] || 'Pendente',
+        statusCode: p.statusName.toLowerCase() as 'active' | 'inactive' | 'pending',
+        createdAt: p.createdAt,
+      };
+    });
 
     totalElements = producersResponse.totalElements;
     totalPages = producersResponse.totalPages;

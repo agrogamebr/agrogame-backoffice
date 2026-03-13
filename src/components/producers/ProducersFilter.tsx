@@ -4,6 +4,7 @@ import { ChevronDown, Filter, X } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { FILTERABLE_STATUSES } from '@/types/producer-status';
 
 interface FilterOptions {
   name: string;
@@ -133,8 +134,11 @@ export function ProducersFilter() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Todos</option>
-                  <option value="1">Aprovado</option>
-                  <option value="3">Pendente</option>
+                  {FILTERABLE_STATUSES.map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
