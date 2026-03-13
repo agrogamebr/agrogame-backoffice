@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 interface FilterOptions {
   name: string;
   cpf: string;
-  status: string;
+  statusId: string;
 }
 
 export function ProducersFilter() {
@@ -19,10 +19,10 @@ export function ProducersFilter() {
   const [filters, setFilters] = useState<FilterOptions>({
     name: searchParams.get('name') || '',
     cpf: searchParams.get('cpf') || '',
-    status: searchParams.get('status') || '',
+    statusId: searchParams.get('statusId') || '',
   });
 
-  const hasActiveFilters = filters.name || filters.cpf || filters.status;
+  const hasActiveFilters = filters.name || filters.cpf || filters.statusId;
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -51,7 +51,7 @@ export function ProducersFilter() {
     setFilters({
       name: '',
       cpf: '',
-      status: '',
+      statusId: '',
     });
   };
 
@@ -60,7 +60,7 @@ export function ProducersFilter() {
     const params = new URLSearchParams(searchParams);
     params.delete('name');
     params.delete('cpf');
-    params.delete('status');
+    params.delete('statusId');
     params.set('page', '0');
     router.push(`/users?${params.toString()}`);
     setIsOpen(false);
@@ -128,14 +128,13 @@ export function ProducersFilter() {
                   Status do Cadastro
                 </label>
                 <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  value={filters.statusId}
+                  onChange={(e) => handleFilterChange('statusId', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Todos</option>
-                  <option value="active">Ativo</option>
-                  <option value="inactive">Inativo</option>
-                  <option value="pending">Pendente</option>
+                  <option value="1">Aprovado</option>
+                  <option value="3">Pendente</option>
                 </select>
               </div>
             </div>

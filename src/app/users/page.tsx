@@ -10,7 +10,7 @@ const statusMapping: Record<string, ProducerStatus> = {
   'Pendente': 'Pendente',
 };
 
-export default async function UsersPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; name?: string; cpf?: string; status?: string }> }) {
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; name?: string; cpf?: string; statusId?: string }> }) {
 
   const params = await searchParams;
   const page = Number(params?.page) || 0;
@@ -20,7 +20,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   const filters = {
     name: params?.name,
     cpf: params?.cpf,
-    status: params?.status,
+    statusId: params?.statusId ? Number(params.statusId) : undefined,
   };
 
   let producers: Producer[] = [];

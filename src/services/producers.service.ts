@@ -23,7 +23,7 @@ export async function listProducers(
   filters?: {
     name?: string;
     cpf?: string;
-    status?: string;
+    statusId?: number;
   }
 ): Promise<ProducersListResponse> {
   const params = new URLSearchParams();
@@ -34,7 +34,7 @@ export async function listProducers(
   if (filters) {
     if (filters.name) params.append('name', filters.name);
     if (filters.cpf) params.append('cpf', filters.cpf);
-    if (filters.status) params.append('status', filters.status);
+    if (filters.statusId) params.append('statusId', filters.statusId.toString());
   }
 
   const response = await apiFetch(`/api/backoffice/producers/list?${params.toString()}`);
