@@ -56,7 +56,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
     <div className="max-w-8xl mx-4 space-y-4 pt-14">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
         <h1 className="w-92 h-11 text-2xl font-bold text-gray-900 flex items-center">
-          Produtores Rurais
+          Gerenciar Produtores Rurais
         </h1>
 
         <div className="w-48 h-11">
