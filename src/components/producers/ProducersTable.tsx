@@ -147,7 +147,6 @@ export function ProducersTable({
                             }}
                             className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
                           >
-                            <Receipt className="w-4 h-4 text-gray-500" />
                             <span>Ver extrato de pontos</span>
                           </button>
                         </div>
