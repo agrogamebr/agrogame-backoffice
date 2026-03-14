@@ -1,12 +1,13 @@
 'use client';
 
-import { Eye } from 'lucide-react';
+import { MoreVertical, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
+import { useState } from 'react';
 
 export type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente';
 export type ProducerStatusCode = 'active' | 'inactive' | 'pending';
@@ -43,6 +44,7 @@ export function ProducersTable({
 }: ProducersTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
@@ -60,6 +62,17 @@ export function ProducersTable({
   const handleViewProfile = (userId: number) => {
     // TODO: Navigate to AGRO-241 when implemented
     router.push(`/users/${userId}`);
+  };
+
+  const handleViewPointsStatement = (userId: number) => {
+    // TODO: Navigate to points statement page
+    router.push(`/users/${userId}/points`);
+    setOpenMenuId(null);
+  };
+
+  const toggleMenu = (userId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === userId ? null : userId);
   };
 
   const formatDate = (dateString: string) => {
@@ -106,18 +119,41 @@ export function ProducersTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewProfile(producer.userId);
-                    }}
-                    variant="ghost"
-                    size="icon"
-                    className="hover:scale-110"
-                    title="Visualizar perfil"
-                  >
-                    <Eye className="w-4 h-4 text-[#0B63E5]" />
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      onClick={(e) => toggleMenu(producer.userId, e)}
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-gray-100"
+                      title="Ações"
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-600" />
+                    </Button>
+
+                    {openMenuId === producer.userId && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(null);
+                          }}
+                        />
+                        <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewPointsStatement(producer.userId);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                          >
+                            <Receipt className="w-4 h-4 text-gray-500" />
+                            <span>Ver extrato de pontos</span>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </TableCell>
             </TableRow>
