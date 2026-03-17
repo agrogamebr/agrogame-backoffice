@@ -1,205 +1,131 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
+import { PointsStatementTable } from '@/components/producers/PointsStatementTable';
+import { PointsStatementFilter } from '@/components/producers/PointsStatementFilter';
+import { getPointsStatement, PointsStatementItem } from '@/services/points-statement.service';
+import { listFarms, listProductionUnitsBackoffice } from '@/services/activity-create.service';
+import { redirect } from 'next/navigation';
+import { EmptyState } from '@/components/activities/EmptyState';
 
-interface PointTransaction {
-  id: string;
-  date: string;
-  activity: string;
-  points: number;
-  type: 'credit' | 'debit';
-  status: 'completed' | 'pending' | 'canceled';
-}
-
-// Dados mockados do extrato de pontos
-const mockPointsExtract: PointTransaction[] = [
-  {
-    id: '1',
-    date: '2024-02-15',
-    activity: 'Colheita de Café',
-    points: 150,
-    type: 'credit',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    date: '2024-02-14',
-    activity: 'Plantio de Milho',
-    points: 200,
-    type: 'credit',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    date: '2024-02-12',
-    activity: 'Aplicação de Defensivos',
-    points: 100,
-    type: 'credit',
-    status: 'completed',
-  },
-  {
-    id: '4',
-    date: '2024-02-10',
-    activity: 'Resgate de Prêmio',
-    points: -50,
-    type: 'debit',
-    status: 'completed',
-  },
-  {
-    id: '5',
-    date: '2024-02-08',
-    activity: 'Manutenção de Equipamentos',
-    points: 80,
-    type: 'credit',
-    status: 'pending',
-  },
-];
-
-// Dados mockados dos usuários
-const mockUsers = [
-  {
-    id: '1',
-    fullName: 'Marcos Guilherme',
-    farm: 'Retiro Velho',
-  },
-  {
-    id: '2',
-    fullName: 'Rafael Santos',
-    farm: 'Macaúbas',
-  },
-  {
-    id: '3',
-    fullName: 'Ricardo Oliveira',
-    farm: 'Rancho Fundo',
-  },
-  {
-    id: '4',
-    fullName: 'André Ribeiro',
-    farm: 'Lago Azul',
-  },
-  {
-    id: '5',
-    fullName: 'João Silva',
-    farm: 'Vista Alegre',
-  },
-  {
-    id: '6',
-    fullName: 'Maria Oliveira',
-    farm: 'Recanto Verde',
-  },
-];
-
-export default async function UserExtractPage({ 
-  params 
+export default async function PointsStatementPage({ 
+  params,
+  searchParams 
 }: { 
-  params: Promise<{ id: string }> 
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ 
+    page?: string; 
+    size?: string; 
+    name?: string;
+    farmId?: string;
+    productionUnitId?: string;
+    operationType?: string;
+    startDate?: string;
+    endDate?: string;
+  }>
 }) {
-  const { id } = await params;
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   
-  // Busca o usuário mockado
-  const user = mockUsers.find(u => u.id === id);
-  
-  if (!user) {
-    return (
-      <div className="max-w-8xl mx-4 space-y-4 pt-14">
-        <p className="text-gray-600">Usuário não encontrado</p>
-      </div>
-    );
+  const userId = resolvedParams.id;
+  const userName = resolvedSearchParams.name || 'Usuário';
+  const page = Number(resolvedSearchParams.page) || 0;
+  const size = Number(resolvedSearchParams.size) || 5;
+
+  // Extract filter parameters
+  const filters = {
+    farmId: resolvedSearchParams.farmId ? Number(resolvedSearchParams.farmId) : undefined,
+    productionUnitId: resolvedSearchParams.productionUnitId ? Number(resolvedSearchParams.productionUnitId) : undefined,
+    operationType: resolvedSearchParams.operationType,
+    startDate: resolvedSearchParams.startDate,
+    endDate: resolvedSearchParams.endDate,
+  };
+
+  let items: PointsStatementItem[] = [];
+  let totalElements = 0;
+  let totalPages = 0;
+  let currentBalance = 0;
+  let farms: { id: number; name: string }[] = [];
+  let productionUnits: { id: number; name: string }[] = [];
+
+  try {
+    // Load filter options and statement data in parallel
+    const [farmsResponse, productionUnitsResponse, statementResponse] = await Promise.all([
+      listFarms().catch(() => []),
+      listProductionUnitsBackoffice().catch(() => []),
+      getPointsStatement(Number(userId), page, size, filters),
+    ]);
+
+    farms = farmsResponse.map(f => ({
+      id: f.id,
+      name: f.name,
+    }));
+
+    productionUnits = productionUnitsResponse.map(pu => ({
+      id: pu.id,
+      name: pu.name,
+    }));
+
+    items = statementResponse.items;
+    totalElements = statementResponse.totalElements;
+    totalPages = statementResponse.totalPages;
+    currentBalance = statementResponse.currentBalance;
+  } catch (e: unknown) {
+    const err = e as { message?: string; status?: number };
+    if (err.message === 'Token JWT ausente ou inválido' || err.message === 'Unauthorized' || err.status === 401) {
+      redirect(`/api/auth/logout?error=${encodeURIComponent(err.message || 'Erro desconhecido')}`);
+    }
+    console.error(err);
+    // Don't set error - just show empty state
   }
 
-  // Calcula o saldo total de pontos
-  const totalPoints = mockPointsExtract.reduce((acc, transaction) => {
-    if (transaction.status === 'completed') {
-      return acc + transaction.points;
-    }
-    return acc;
-  }, 0);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
+  const hasItems = items.length > 0;
 
   return (
     <div className="max-w-8xl mx-4 space-y-4 pt-14">
-      <Link 
-        href="/users" 
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar para usuários</span>
-      </Link>
+      <div className="flex items-center justify-between gap-5 mb-6">
+        <div className="flex items-center gap-4">
+          <Link href="/users" className="text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Extrato de pontos &gt; {userName}
+          </h1>
+        </div>
 
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{user.fullName}</h1>
-        <p className="text-gray-600 mt-1">{user.farm}</p>
-      </div>
+        <div className="flex items-center gap-5">
+          <div className="w-[347px] h-12 bg-[#25A259] border border-[#25A259] rounded-2xl py-6 px-4 flex items-center justify-center gap-4 text-white" style={{ boxShadow: '1px 1px 4px 0px rgba(0, 0, 0, 0.2)' }}>
+            <span className="text-sm font-medium whitespace-nowrap">Total de pontos acumulados</span>
+            <span className="text-xl font-bold whitespace-nowrap">{currentBalance.toLocaleString('pt-BR')} pts</span>
+          </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Saldo Total de Pontos</p>
-            <p className="text-3xl font-bold text-blue-600">{totalPoints.toLocaleString('pt-BR')} pts</p>
+          <div className="w-48 h-11">
+            <PointsStatementFilter
+              userId={userId}
+              farms={farms}
+              productionUnits={productionUnits}
+            />
           </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Extrato de Pontos</h2>
-        
-        <div className="bg-white rounded-lg shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>DATA</TableHead>
-                <TableHead>ATIVIDADE</TableHead>
-                <TableHead>TIPO</TableHead>
-                <TableHead>STATUS</TableHead>
-                <TableHead className="text-right">PONTOS</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockPointsExtract.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{formatDate(transaction.date)}</TableCell>
-                  <TableCell className="font-medium">{transaction.activity}</TableCell>
-                  <TableCell>
-                    <Badge variant={transaction.type === 'credit' ? 'enviado' : 'cancelado'}>
-                      {transaction.type === 'credit' ? 'Crédito' : 'Débito'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={
-                        transaction.status === 'completed' 
-                          ? 'completado' 
-                          : transaction.status === 'pending' 
-                            ? 'enviado' 
-                            : 'cancelado'
-                      }
-                    >
-                      {transaction.status === 'completed' 
-                        ? 'Completado' 
-                        : transaction.status === 'pending' 
-                          ? 'Pendente' 
-                          : 'Cancelado'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className={transaction.points > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                      {transaction.points > 0 ? '+' : ''}{transaction.points.toLocaleString('pt-BR')}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+      <div className="space-y-4">
+        {hasItems ? (
+          <PointsStatementTable
+            items={items}
+            currentPage={page}
+            pageSize={size}
+            totalElements={totalElements}
+            totalPages={totalPages}
+            userId={userId}
+          />
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">
+            <EmptyState
+              title="Nenhum registro encontrado"
+              description="Não há transações de pontos para este produtor ainda"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { MoreVertical, Receipt } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
@@ -64,9 +64,8 @@ export function ProducersTable({
     router.push(`/users/${userId}`);
   };
 
-  const handleViewPointsStatement = (userId: number) => {
-    // TODO: Navigate to points statement page
-    router.push(`/users/${userId}/points`);
+  const handleViewPointsStatement = (userId: number, userName: string) => {
+    router.push(`/users/${userId}/extrato?name=${encodeURIComponent(userName)}`);
     setOpenMenuId(null);
   };
 
@@ -143,7 +142,7 @@ export function ProducersTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleViewPointsStatement(producer.userId);
+                              handleViewPointsStatement(producer.userId, producer.name);
                             }}
                             className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
                           >
