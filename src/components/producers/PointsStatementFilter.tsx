@@ -161,8 +161,8 @@ export function PointsStatementFilter({
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Todos</option>
-                  <option value="Crédito">Crédito</option>
-                  <option value="Débito">Débito</option>
+                  <option value="earn">Crédito</option>
+                  <option value="spend">Débito</option>
                 </select>
               </div>
 
