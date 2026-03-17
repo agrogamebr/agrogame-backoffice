@@ -120,6 +120,35 @@ export async function listProductionUnits(): Promise<ProductionUnitResponse[]> {
   return units.filter((item) => item.isActive);
 }
 
+export async function listProductionUnitsBackoffice(): Promise<ProductionUnitResponse[]> {
+  const response = await apiFetch('/api/backoffice/production-units/list');
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || 'Erro ao carregar unidades produtivas') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+
+  // Handle different potential response structures
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (data.items && Array.isArray(data.items)) {
+    return data.items;
+  }
+
+  if (data.content && Array.isArray(data.content)) {
+    return data.content;
+  }
+
+  console.warn('Unexpected production units response structure:', data);
+  return [];
+}
+
 export async function listProductionUnitsFiltered(
   farmIds: number[],
   cropTypeIds: number[]
