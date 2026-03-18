@@ -111,7 +111,7 @@ export function CompletedActivitiesTable({
                       }}
                       variant="ghost"
                       size="icon"
-                      className="hover:bg-blue-50"
+                      className="hover:bg-blue-50 cursor-pointer"
                       title="Visualizar detalhes"
                     >
                       <Eye className="w-4 h-4 text-blue-600" />

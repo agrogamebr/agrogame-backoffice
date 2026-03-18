@@ -177,7 +177,7 @@ export function ProducersTable({
                               e.stopPropagation();
                               handleManageProducer(producer.userId, producer.name, producer.status);
                             }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors cursor-pointer"
                           >
                             <span>Gerenciar dados do produtor</span>
                           </button>
@@ -186,7 +186,7 @@ export function ProducersTable({
                               e.stopPropagation();
                               handleViewPointsStatement(producer.userId, producer.name);
                             }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors cursor-pointer"
                           >
                             <span>Ver extrato de pontos</span>
                           </button>

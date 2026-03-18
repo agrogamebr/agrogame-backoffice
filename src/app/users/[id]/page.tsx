@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
+import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 
 export default async function ManageProducerPage({ 
   params,
@@ -33,10 +34,10 @@ export default async function ManageProducerPage({
   };
 
   return (
-    <div className="max-w-8xl mx-4 space-y-4 pt-14">
+    <div className="max-w-8xl mx-4 space-y-4 pt-14 pb-8 overflow-y-auto max-h-screen">
       <div className="flex items-center justify-between gap-5 mb-6">
         <div className="flex items-center gap-4">
-          <Link href="/users" className="text-gray-600 hover:text-gray-900">
+          <Link href="/users" className="text-gray-600 hover:text-gray-900 cursor-pointer">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-3">
@@ -63,11 +64,7 @@ export default async function ManageProducerPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
-        <p className="text-gray-500 text-center py-8">
-          Conteúdo em desenvolvimento
-        </p>
-      </div>
+      <ProducerDataForm />
     </div>
   );
 }

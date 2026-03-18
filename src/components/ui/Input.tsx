@@ -45,7 +45,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={id}
             type={inputType}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-white ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 ${
+              props.readOnly || props.disabled ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+            } ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
               } ${isPassword ? 'pr-12' : ''} ${className}`}
             onInvalid={handleInvalid}
             onChange={handleChange}
