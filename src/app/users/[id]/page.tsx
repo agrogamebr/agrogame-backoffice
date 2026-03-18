@@ -51,8 +51,9 @@ export default async function ManageProducerPage({
 
         <div className="flex items-center gap-5">
           <Button
-            variant="secondary"
-            className="border-2 border-[#007BFF] text-[#007BFF] bg-white hover:bg-blue-50 font-semibold px-6"
+            variant="outline"
+            size="lg"
+            className="font-medium"
           >
             Criar Vínculos
           </Button>

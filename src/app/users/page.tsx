@@ -11,7 +11,6 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   const page = Number(params?.page) || 0;
   const size = Number(params?.size) || 10;
 
-  // Build filters object from query params
   const filters = {
     name: params?.name,
     cpf: params?.cpf,
