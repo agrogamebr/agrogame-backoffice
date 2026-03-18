@@ -8,9 +8,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
 import { useState } from 'react';
+import { ProducerStatusDisplay, ProducerStatusCode } from '@/types/producer-status';
 
-export type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente';
-export type ProducerStatusCode = 'active' | 'inactive' | 'pending';
+export type ProducerStatus = ProducerStatusDisplay;
 
 export interface Producer {
   userId: number;
@@ -30,9 +30,12 @@ interface ProducersTableProps {
 }
 
 const statusBadgeVariant: Record<ProducerStatus, "enviado" | "rascunho" | "excluida"> = {
+  'Aprovado': 'enviado',
   'Ativo': 'enviado',
-  'Inativo': 'excluida',
   'Pendente': 'rascunho',
+  'Rejeitado': 'excluida',
+  'Inativo': 'excluida',
+  'Suspenso': 'rascunho',
 };
 
 export function ProducersTable({
