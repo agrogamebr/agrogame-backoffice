@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
+import { getUserInfo } from '@/services/producers.service';
 
 export default async function ManageProducerPage({ 
   params,
@@ -21,6 +22,15 @@ export default async function ManageProducerPage({
   const userId = resolvedParams.id;
   const userName = resolvedSearchParams.name || 'Usuário';
   const status = resolvedSearchParams.status || 'Ativo';
+
+  let userData = null;
+  let userError = null;
+  try {
+    userData = await getUserInfo(userId);
+  } catch (error) {
+    console.error('[ManageProducerPage] Erro ao buscar dados do usuário:', error);
+    userError = 'Erro ao carregar informações do produtor';
+  }
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
 
@@ -64,7 +74,7 @@ export default async function ManageProducerPage({
         </div>
       </div>
 
-      <ProducerDataForm />
+      <ProducerDataForm userData={userData} error={userError} />
     </div>
   );
 }

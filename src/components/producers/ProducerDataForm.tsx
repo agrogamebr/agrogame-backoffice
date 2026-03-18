@@ -1,20 +1,38 @@
-'use client';
-
-import { useState } from 'react';
 import { Eye } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { UserInfoResponse } from '@/services/producers.service';
 
-export function ProducerDataForm() {
-  const [documentType, setDocumentType] = useState<'CPF' | 'CNPJ'>('CPF');
+interface ProducerDataFormProps {
+  userData: UserInfoResponse | null;
+  error: string | null;
+}
+
+export function ProducerDataForm({ userData, error }: ProducerDataFormProps) {
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Nenhuma informação encontrada</div>
+      </div>
+    );
+  }
+
+  const documentType = userData?.documentTypeCode === 'cpf' ? 'CPF' : 'CNPJ';
 
   return (
     <div className="space-y-6">
-      {/* Seção de Documentos */}
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Documentos</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Tipo de documento */}
           <div className="md:col-span-3">
             <label htmlFor="documentType" className="block text-sm font-medium text-gray-700 mb-2">
               Tipo de documento
@@ -22,7 +40,6 @@ export function ProducerDataForm() {
             <select
               id="documentType"
               value={documentType}
-              onChange={(e) => setDocumentType(e.target.value as 'CPF' | 'CNPJ')}
               disabled
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200 text-gray-900 bg-gray-50 cursor-not-allowed"
             >
@@ -31,18 +48,16 @@ export function ProducerDataForm() {
             </select>
           </div>
 
-          {/* Número do documento */}
           <div className="md:col-span-6">
             <Input
               label={documentType}
               id="documentNumber"
               placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
-              defaultValue="770.581.440-44"
+              value={userData.documentNumber || ''}
               readOnly
             />
           </div>
 
-          {/* Imagem do documento */}
           <div className="md:col-span-3">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imagem do documento
@@ -60,62 +75,56 @@ export function ProducerDataForm() {
         </div>
       </div>
 
-      {/* Seção de Contato */}
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Contato</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Email 1 */}
           <div>
             <Input
               label="Email"
               id="email1"
               type="email"
               placeholder="email@exemplo.com"
-              defaultValue="0,222542"
+              value={userData.email1 || ''}
               readOnly
             />
           </div>
 
-          {/* Email 2 */}
           <div>
             <Input
               label="Email"
               id="email2"
               type="email"
               placeholder="email@exemplo.com"
-              defaultValue="0,222542"
+              value={userData.email2 || ''}
               readOnly
             />
           </div>
 
-          {/* Telefone */}
           <div>
             <Input
               label="Telefone com DDD"
               id="phone"
               type="tel"
               placeholder="(00) 00000-0000"
-              defaultValue="34 3241 9874"
+              value={userData.telefone || ''}
               readOnly
             />
           </div>
         </div>
       </div>
 
-      {/* Seção de Endereço */}
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Endereço</h2>
         
         <div className="grid grid-cols-1 gap-6">
-          {/* Primeira linha: Endereço, Número, CEP */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             <div className="md:col-span-6">
               <Input
                 label="Endereço"
                 id="address"
                 placeholder="Nome da rua"
-                defaultValue="Avenida São Paulo"
+                value={userData.address || ''}
                 readOnly
               />
             </div>
@@ -124,7 +133,7 @@ export function ProducerDataForm() {
                 label="Número"
                 id="number"
                 placeholder="000"
-                defaultValue="46"
+                value={userData.addressNumber || ''}
                 readOnly
               />
             </div>
@@ -133,20 +142,19 @@ export function ProducerDataForm() {
                 label="CEP"
                 id="cep"
                 placeholder="00000-000"
-                defaultValue="38.442-000"
+                value={userData.zipCode || ''}
                 readOnly
               />
             </div>
           </div>
 
-          {/* Segunda linha: Cidade e Estado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Input
                 label="Cidade"
                 id="city"
                 placeholder="Nome da cidade"
-                defaultValue="Uberaba"
+                value={userData.city || ''}
                 readOnly
               />
             </div>
@@ -155,7 +163,7 @@ export function ProducerDataForm() {
                 label="Estado"
                 id="state"
                 placeholder="Nome do estado"
-                defaultValue="Minas Gerais"
+                value={userData.state || ''}
                 readOnly
               />
             </div>
