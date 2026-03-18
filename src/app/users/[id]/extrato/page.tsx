@@ -48,7 +48,6 @@ export default async function PointsStatementPage({
   let productionUnits: { id: number; name: string }[] = [];
 
   try {
-    // Load filter options and statement data in parallel
     const [farmsResponse, productionUnitsResponse, statementResponse] = await Promise.all([
       listFarms().catch(() => []),
       listProductionUnitsBackoffice().catch(() => []),
@@ -75,7 +74,6 @@ export default async function PointsStatementPage({
       redirect(`/api/auth/logout?error=${encodeURIComponent(err.message || 'Erro desconhecido')}`);
     }
     console.error(err);
-    // Don't set error - just show empty state
   }
 
   const hasItems = items.length > 0;
