@@ -48,7 +48,6 @@ export default async function PointsStatementPage({
   let productionUnits: { id: number; name: string }[] = [];
 
   try {
-    // Load filter options and statement data in parallel
     const [farmsResponse, productionUnitsResponse, statementResponse] = await Promise.all([
       listFarms().catch(() => []),
       listProductionUnitsBackoffice().catch(() => []),
@@ -75,7 +74,6 @@ export default async function PointsStatementPage({
       redirect(`/api/auth/logout?error=${encodeURIComponent(err.message || 'Erro desconhecido')}`);
     }
     console.error(err);
-    // Don't set error - just show empty state
   }
 
   const hasItems = items.length > 0;
@@ -84,7 +82,7 @@ export default async function PointsStatementPage({
     <div className="max-w-8xl mx-4 space-y-4 pt-14">
       <div className="flex items-center justify-between gap-5 mb-6">
         <div className="flex items-center gap-4">
-          <Link href="/users" className="text-gray-600 hover:text-gray-900">
+          <Link href="/users" className="text-gray-600 hover:text-gray-900 cursor-pointer">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">

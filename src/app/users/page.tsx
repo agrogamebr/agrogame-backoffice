@@ -1,18 +1,9 @@
 import { ProducersFilter } from '@/components/producers/ProducersFilter';
 import { EmptyState } from '@/components/activities/EmptyState';
-import { ProducersTable, Producer, ProducerStatus } from '@/components/producers/ProducersTable';
+import { ProducersTable, Producer } from '@/components/producers/ProducersTable';
 import { listProducers } from '@/services/producers.service';
 import { redirect } from 'next/navigation';
-import { STATUS_DISPLAY, ProducerStatusId } from '@/types/producer-status';
-
-const statusMapping: Record<string, ProducerStatus> = {
-  'Aprovado': 'Ativo',
-  'Ativo': 'Ativo',
-  'Pendente': 'Pendente',
-  'Rejeitado': 'Inativo',
-  'Inativo': 'Inativo',
-  'Suspenso': 'Inativo',
-};
+import { STATUS_DISPLAY, STATUS_ID_TO_CODE, ProducerStatusId } from '@/types/producer-status';
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; name?: string; cpf?: string; statusId?: string }> }) {
 
@@ -20,7 +11,6 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   const page = Number(params?.page) || 0;
   const size = Number(params?.size) || 10;
 
-  // Build filters object from query params
   const filters = {
     name: params?.name,
     cpf: params?.cpf,
@@ -36,12 +26,13 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
     producers = producersResponse.content.map(p => {
       const statusDisplay = STATUS_DISPLAY[p.statusId as ProducerStatusId] || 'Pendente';
+      const statusCode = STATUS_ID_TO_CODE[p.statusId as ProducerStatusId] || 'pending';
       return {
         userId: p.userId,
         name: p.fullName,
         cpf: p.cpf || 'N/A',
-        status: statusMapping[statusDisplay] || 'Pendente',
-        statusCode: p.statusName.toLowerCase() as 'active' | 'inactive' | 'pending',
+        status: statusDisplay,
+        statusCode: statusCode,
         createdAt: p.createdAt,
       };
     });

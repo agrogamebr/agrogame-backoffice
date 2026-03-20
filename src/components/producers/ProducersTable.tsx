@@ -8,9 +8,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
 import { useState } from 'react';
+import { ProducerStatusDisplay, ProducerStatusCode } from '@/types/producer-status';
 
-export type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente';
-export type ProducerStatusCode = 'active' | 'inactive' | 'pending';
+export type ProducerStatus = ProducerStatusDisplay;
 
 export interface Producer {
   userId: number;
@@ -30,9 +30,12 @@ interface ProducersTableProps {
 }
 
 const statusBadgeVariant: Record<ProducerStatus, "enviado" | "rascunho" | "excluida"> = {
+  'Aprovado': 'enviado',
   'Ativo': 'enviado',
-  'Inativo': 'excluida',
   'Pendente': 'rascunho',
+  'Rejeitado': 'excluida',
+  'Inativo': 'excluida',
+  'Suspenso': 'rascunho',
 };
 
 export function ProducersTable({
@@ -45,6 +48,7 @@ export function ProducersTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
@@ -64,14 +68,36 @@ export function ProducersTable({
     router.push(`/users/${userId}`);
   };
 
+  const handleManageProducer = (userId: number, userName: string, status: ProducerStatus) => {
+    router.push(`/users/${userId}?name=${encodeURIComponent(userName)}&status=${status}`);
+    setOpenMenuId(null);
+    setMenuPosition(null);
+  };
+
   const handleViewPointsStatement = (userId: number, userName: string) => {
     router.push(`/users/${userId}/extrato?name=${encodeURIComponent(userName)}`);
     setOpenMenuId(null);
+    setMenuPosition(null);
   };
 
   const toggleMenu = (userId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setOpenMenuId(openMenuId === userId ? null : userId);
+    
+    if (openMenuId === userId) {
+      setOpenMenuId(null);
+      setMenuPosition(null);
+    } else {
+      const button = e.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      
+      // Calculate position - menu appears to the left of the button
+      setMenuPosition({
+        top: rect.bottom + 4, // 4px gap below button
+        right: window.innerWidth - rect.right, // Align to right edge of button
+      });
+      
+      setOpenMenuId(userId);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -129,22 +155,38 @@ export function ProducersTable({
                       <MoreVertical className="w-4 h-4 text-gray-600" />
                     </Button>
 
-                    {openMenuId === producer.userId && (
+                    {openMenuId === producer.userId && menuPosition && (
                       <>
                         <div
-                          className="fixed inset-0 z-10"
+                          className="fixed inset-0 z-40"
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenMenuId(null);
+                            setMenuPosition(null);
                           }}
                         />
-                        <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                        <div 
+                          className="fixed w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                          style={{
+                            top: `${menuPosition.top}px`,
+                            right: `${menuPosition.right}px`,
+                          }}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleManageProducer(producer.userId, producer.name, producer.status);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors cursor-pointer"
+                          >
+                            <span>Gerenciar dados do produtor</span>
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleViewPointsStatement(producer.userId, producer.name);
                             }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors cursor-pointer"
                           >
                             <span>Ver extrato de pontos</span>
                           </button>

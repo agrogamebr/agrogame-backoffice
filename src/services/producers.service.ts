@@ -17,6 +17,24 @@ export interface ProducersListResponse {
   number: number;
 }
 
+export interface UserInfoResponse {
+  userId: number;
+  fullName: string;
+  email1: string | null;
+  email2: string | null;
+  userTypeId: number;
+  userTypeName: string;
+  documentNumber: string;
+  documentTypeId: number;
+  documentTypeCode: string;
+  telefone: string | null;
+  address: string | null;
+  addressNumber: string | null;
+  zipCode: string | null;
+  city: string | null;
+  state: string | null;
+}
+
 export async function listProducers(
   page: number = 0,
   size: number = 10,
@@ -55,4 +73,29 @@ export async function listProducers(
     size: data.size || 10,
     number: data.number || 0,
   };
+}
+
+export async function getUserInfo(userId: string): Promise<UserInfoResponse> {
+  console.log('[getUserInfo] Buscando informações do usuário:', userId);
+  
+  const endpoint = `/api/backoffice/user-info/${userId}`;
+  const response = await apiFetch(endpoint);
+  
+  console.log('[getUserInfo] Status da resposta:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[getUserInfo] Erro na resposta:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    const error = new Error(errorData.message || 'Erro ao buscar informações do usuário') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  console.log('[getUserInfo] Dados recebidos com sucesso');
+  return data;
 }

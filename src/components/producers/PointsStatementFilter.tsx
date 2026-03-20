@@ -88,7 +88,7 @@ export function PointsStatementFilter({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full bg-white hover:bg-gray-50 border border-gray-200 rounded-sm px-4 py-2.5 flex items-center justify-between text-sm font-medium text-gray-700 transition-colors"
+        className="w-full h-full bg-white hover:bg-gray-50 border border-gray-200 rounded-sm px-4 py-2.5 flex items-center justify-between text-sm font-medium text-gray-700 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4" />
@@ -108,7 +108,7 @@ export function PointsStatementFilter({
               <h3 className="text-sm font-semibold text-gray-900">Filtros</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -194,8 +194,8 @@ export function PointsStatementFilter({
             <div className="flex gap-2 pt-2">
               <Button
                 onClick={handleReset}
-                variant="secondary"
-                className="flex-1"
+                variant="ghost"
+                className="flex-1 border-2 border-[#0B63E5] bg-white text-[#0B63E5] hover:bg-blue-50 font-medium py-2.5"
                 disabled={!hasActiveFilters}
               >
                 Limpar
@@ -203,7 +203,7 @@ export function PointsStatementFilter({
               <Button
                 onClick={handleApply}
                 variant="primary"
-                className="flex-1"
+                className="flex-1 bg-[#0B63E5] hover:bg-[#0951bd] font-medium py-2.5"
               >
                 Aplicar
               </Button>
