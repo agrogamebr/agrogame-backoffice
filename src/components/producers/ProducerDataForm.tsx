@@ -58,7 +58,7 @@ export function ProducerDataForm({ userData, error }: ProducerDataFormProps) {
             />
           </div>
 
-          <div className="md:col-span-3">
+          {/* <div className="md:col-span-3">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imagem do documento
             </label>
@@ -71,7 +71,7 @@ export function ProducerDataForm({ userData, error }: ProducerDataFormProps) {
                 <Eye className="w-5 h-5" />
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
