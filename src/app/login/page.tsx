@@ -1,13 +1,28 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import Image from 'next/image';
 import { loginAction } from '@/app/actions/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, {});
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsForgotPasswordModalOpen(true);
+  };
+
+  const handleForgotPasswordSuccess = () => {
+    // Limpar o campo de senha
+    if (passwordInputRef.current) {
+      passwordInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-white relative overflow-hidden">
@@ -49,6 +64,7 @@ export default function LoginPage() {
             />
 
             <Input
+              ref={passwordInputRef}
               key={state?.errors?.password || state?.errors?.general}
               label="Senha"
               id="password"
@@ -73,10 +89,10 @@ export default function LoginPage() {
               Entrar
             </Button>
 
-            {/* Link Esqueci a senha */}
             <div className="text-center">
               <a
                 href="#"
+                onClick={handleForgotPasswordClick}
                 className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 cursor-pointer"
               >
                 Esqueci a senha
@@ -85,6 +101,12 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordModalOpen}
+        onClose={() => setIsForgotPasswordModalOpen(false)}
+        onSuccess={handleForgotPasswordSuccess}
+      />
     </div>
   );
 }
