@@ -26,11 +26,13 @@ export default async function RootLayout({
   const userInfoCookie = cookieStore.get('user_info');
   let initialUser = null;
 
-  if (userInfoCookie) {
+  if (userInfoCookie?.value && userInfoCookie.value.trim().length > 0) {
     try {
       initialUser = JSON.parse(userInfoCookie.value);
     } catch (e) {
       console.error('Failed to parse user cookie', e);
+      // Se falhar o parse, apaga o cookie inválido
+      cookieStore.delete('user_info');
     }
   }
 

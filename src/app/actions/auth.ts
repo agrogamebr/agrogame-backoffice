@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { login, User } from '@/services/auth.service';
+import { login, User, changeTemporaryPassword } from '@/services/auth.service';
 
 export interface AuthState {
   errors?: {
@@ -60,6 +60,18 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
       path: '/',
     });
 
+    // Se forceChangePassword for true, marca o cookie e redireciona para change-password
+    if (response.forceChangePassword) {
+      cookieStore.set('force_change_password', 'true', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: response.expiresIn / 1000,
+        path: '/',
+      });
+      redirect('/change-password');
+    }
+
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error('Login error:', err);
@@ -78,5 +90,45 @@ export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete('token');
   cookieStore.delete('user_info');
+  cookieStore.delete('force_change_password');
   redirect('/login');
+}
+
+export interface ChangePasswordState {
+  success?: boolean;
+  error?: string;
+  message?: string;
+}
+
+export async function changePasswordAction(
+  formData: FormData
+): Promise<ChangePasswordState> {
+  const newPassword = formData.get('newPassword') as string;
+
+  if (!newPassword) {
+    return { error: 'Por favor, informe a nova senha.' };
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+      return { error: 'Sessão expirada. Por favor, faça login novamente.' };
+    }
+
+    const response = await changeTemporaryPassword(token, newPassword);
+
+    // Remove apenas o cookie de mudança de senha forçada
+    // O logout completo será feito pelo componente através do logoutAction
+    cookieStore.delete('force_change_password');
+
+    return { success: true, message: response.message };
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Change password error:', err);
+    return {
+      error: err.message || 'Erro ao alterar senha. Tente novamente.',
+    };
+  }
 }
