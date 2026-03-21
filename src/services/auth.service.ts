@@ -124,3 +124,32 @@ export async function changePassword(
 
   return response.json();
 }
+
+export async function changeTemporaryPassword(
+  token: string,
+  newPassword: string
+): Promise<ChangePasswordResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/change-temporary-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Erro ao alterar senha';
+    try {
+      const errorData: ForgotPasswordErrorResponse = await response.json();
+      if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch (e) {
+      console.error('Failed to parse error response', e);
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}

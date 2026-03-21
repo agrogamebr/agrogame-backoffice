@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { Check, X } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
-import { changePasswordAction } from '@/app/actions/auth';
+import { changePasswordAction, logoutAction } from '@/app/actions/auth';
 
 interface PasswordValidation {
   minLength: boolean;
@@ -18,41 +17,22 @@ interface PasswordValidation {
 }
 
 export default function ChangePasswordPage() {
-  const router = useRouter();
   const { addToast } = useToast();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordsMatch, setPasswordsMatch] = useState<boolean | null>(null);
   
-  const [validation, setValidation] = useState<PasswordValidation>({
-    minLength: false,
-    hasUpperCase: false,
-    hasLowerCase: false,
-    hasNumber: false,
-    hasSpecialChar: false,
-  });
-
-  // Valida a senha conforme o usuário digita
-  useEffect(() => {
-    const newValidation: PasswordValidation = {
-      minLength: newPassword.length >= 8,
-      hasUpperCase: /[A-Z]/.test(newPassword),
-      hasLowerCase: /[a-z]/.test(newPassword),
-      hasNumber: /\d/.test(newPassword),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
-    };
-    setValidation(newValidation);
-  }, [newPassword]);
+  // Calcula a validação da senha diretamente
+  const validation: PasswordValidation = {
+    minLength: newPassword.length >= 8,
+    hasUpperCase: /[A-Z]/.test(newPassword),
+    hasLowerCase: /[a-z]/.test(newPassword),
+    hasNumber: /\d/.test(newPassword),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
+  };
 
   // Verifica se as senhas coincidem
-  useEffect(() => {
-    if (confirmPassword.length > 0) {
-      setPasswordsMatch(newPassword === confirmPassword);
-    } else {
-      setPasswordsMatch(null);
-    }
-  }, [newPassword, confirmPassword]);
+  const passwordsMatch = confirmPassword.length > 0 ? newPassword === confirmPassword : null;
 
   const isPasswordValid = Object.values(validation).every((v) => v === true);
   const canSubmit = isPasswordValid && passwordsMatch === true && !isSubmitting;
@@ -73,17 +53,18 @@ export default function ChangePasswordPage() {
       const result = await changePasswordAction(formData);
 
       if (result.success) {
-        addToast('Senha alterada com sucesso!', 'success', 3000);
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
+        addToast(result.message || 'Senha alterada com sucesso!', 'success', 3000);
+        // Aguarda um momento para o toast ser visível, então faz logout completo
+        setTimeout(async () => {
+          await logoutAction();
+        }, 1500);
       } else {
         addToast(result.error || 'Erro ao alterar senha', 'error');
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Error changing password:', error);
       addToast('Erro ao alterar senha', 'error');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -105,7 +86,7 @@ export default function ChangePasswordPage() {
       </div>
 
       <div className="relative z-10 flex justify-center items-center min-h-screen px-4">
-        <div className="w-[450px] bg-transparent p-6 flex flex-col justify-center">
+        <div className="w-full max-w-md bg-transparent p-6 flex flex-col justify-center">
           <div className="flex justify-center mb-6">
             <Image
               src="/logoagrogame.svg"
@@ -122,39 +103,52 @@ export default function ChangePasswordPage() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Nova senha"
-              id="newPassword"
-              name="newPassword"
-              type="password"
-              placeholder="Digite sua nova senha"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              disabled={isSubmitting}
-              isPassword
-            />
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Input
+                  label="Nova senha"
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  placeholder="Digite sua nova senha"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  isPassword
+                />
+              </div>
+              <div className="flex items-center justify-center w-10 h-11 mb-0">
+                {isPasswordValid && newPassword.length > 0 && (
+                  <Check className="w-6 h-6 text-green-500" />
+                )}
+              </div>
+            </div>
 
-            <div className="relative">
-              <Input
-                label="Digite a senha novamente"
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="Digite novamente sua nova senha"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={isSubmitting}
-                isPassword
-              />
-              {passwordsMatch !== null && (
-                <div className="absolute right-3 top-9">
-                  {passwordsMatch ? (
-                    <Check className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <X className="w-5 h-5 text-red-500" />
-                  )}
-                </div>
-              )}
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Input
+                  label="Digite a senha novamente"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Digite novamente sua nova senha"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  isPassword
+                />
+              </div>
+              <div className="flex items-center justify-center w-10 h-11 mb-0">
+                {passwordsMatch !== null && (
+                  <>
+                    {passwordsMatch ? (
+                      <Check className="w-6 h-6 text-green-500" />
+                    ) : (
+                      <X className="w-6 h-6 text-red-500" />
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Regras de validação */}

@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { login, User, changePassword } from '@/services/auth.service';
+import { login, User, changeTemporaryPassword } from '@/services/auth.service';
 
 export interface AuthState {
   errors?: {
@@ -97,6 +97,7 @@ export async function logoutAction() {
 export interface ChangePasswordState {
   success?: boolean;
   error?: string;
+  message?: string;
 }
 
 export async function changePasswordAction(
@@ -116,12 +117,13 @@ export async function changePasswordAction(
       return { error: 'Sessão expirada. Por favor, faça login novamente.' };
     }
 
-    await changePassword(token, newPassword);
+    const response = await changeTemporaryPassword(token, newPassword);
 
-    // Remove o cookie de mudança de senha forçada
+    // Remove apenas o cookie de mudança de senha forçada
+    // O logout completo será feito pelo componente através do logoutAction
     cookieStore.delete('force_change_password');
 
-    return { success: true };
+    return { success: true, message: response.message };
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error('Change password error:', err);
