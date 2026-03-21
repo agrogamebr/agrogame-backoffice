@@ -1,0 +1,230 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Check, X } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
+import { changePasswordAction } from '@/app/actions/auth';
+
+interface PasswordValidation {
+  minLength: boolean;
+  hasUpperCase: boolean;
+  hasLowerCase: boolean;
+  hasNumber: boolean;
+  hasSpecialChar: boolean;
+}
+
+export default function ChangePasswordPage() {
+  const router = useRouter();
+  const { addToast } = useToast();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState<boolean | null>(null);
+  
+  const [validation, setValidation] = useState<PasswordValidation>({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
+
+  // Valida a senha conforme o usuário digita
+  useEffect(() => {
+    const newValidation: PasswordValidation = {
+      minLength: newPassword.length >= 8,
+      hasUpperCase: /[A-Z]/.test(newPassword),
+      hasLowerCase: /[a-z]/.test(newPassword),
+      hasNumber: /\d/.test(newPassword),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
+    };
+    setValidation(newValidation);
+  }, [newPassword]);
+
+  // Verifica se as senhas coincidem
+  useEffect(() => {
+    if (confirmPassword.length > 0) {
+      setPasswordsMatch(newPassword === confirmPassword);
+    } else {
+      setPasswordsMatch(null);
+    }
+  }, [newPassword, confirmPassword]);
+
+  const isPasswordValid = Object.values(validation).every((v) => v === true);
+  const canSubmit = isPasswordValid && passwordsMatch === true && !isSubmitting;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('newPassword', newPassword);
+
+      const result = await changePasswordAction(formData);
+
+      if (result.success) {
+        addToast('Senha alterada com sucesso!', 'success', 3000);
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1000);
+      } else {
+        addToast(result.error || 'Erro ao alterar senha', 'error');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      addToast('Erro ao alterar senha', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+      {/* SVG de fundo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[65%] left-[51%] -translate-x-1/2 -translate-y-1/2 w-[108%] h-[108%] max-w-none flex items-center justify-center">
+          <Image
+            src="/wind.svg"
+            alt=""
+            width={1440}
+            height={712}
+            className="w-full h-auto object-contain opacity-100"
+            priority
+          />
+        </div>
+      </div>
+
+      <div className="relative z-10 flex justify-center items-center min-h-screen px-4">
+        <div className="w-[450px] bg-transparent p-6 flex flex-col justify-center">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logoagrogame.svg"
+              alt="AgroGame Logo"
+              width={280}
+              height={80}
+              priority
+              className="w-auto h-auto"
+            />
+          </div>
+
+          <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">
+            Crie uma nova senha
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Nova senha"
+              id="newPassword"
+              name="newPassword"
+              type="password"
+              placeholder="Digite sua nova senha"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              disabled={isSubmitting}
+              isPassword
+            />
+
+            <div className="relative">
+              <Input
+                label="Digite a senha novamente"
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="Digite novamente sua nova senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isSubmitting}
+                isPassword
+              />
+              {passwordsMatch !== null && (
+                <div className="absolute right-3 top-9">
+                  {passwordsMatch ? (
+                    <Check className="w-5 h-5 text-green-500" />
+                  ) : (
+                    <X className="w-5 h-5 text-red-500" />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Regras de validação */}
+            <div className="mt-6 space-y-2 bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                A senha deve conter:
+              </p>
+              
+              <ValidationItem
+                label="Pelo menos 8 caracteres"
+                isValid={validation.minLength}
+              />
+              <ValidationItem
+                label="Pelo menos uma letra maiúscula"
+                isValid={validation.hasUpperCase}
+              />
+              <ValidationItem
+                label="Pelo menos uma letra minúscula"
+                isValid={validation.hasLowerCase}
+              />
+              <ValidationItem
+                label="Pelo menos um número"
+                isValid={validation.hasNumber}
+              />
+              <ValidationItem
+                label="Pelo menos um caractere especial (!@#$%^&*...)"
+                isValid={validation.hasSpecialChar}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full mt-6"
+              isLoading={isSubmitting}
+              disabled={!canSubmit}
+            >
+              Confirmar
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ValidationItemProps {
+  label: string;
+  isValid: boolean;
+}
+
+function ValidationItem({ label, isValid }: ValidationItemProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-colors ${
+          isValid
+            ? 'bg-green-500 border-green-500'
+            : 'bg-white border-gray-300'
+        }`}
+      >
+        {isValid && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+      </div>
+      <span
+        className={`text-sm transition-colors ${
+          isValid ? 'text-green-700 font-medium' : 'text-gray-600'
+        }`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
