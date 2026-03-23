@@ -4,7 +4,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
-import { getUserInfo } from '@/services/producers.service';
+import { FarmsTable } from '@/components/producers/FarmsTable';
+import { getUserInfo, listFarms } from '@/services/producers.service';
 
 export default async function ManageProducerPage({ 
   params,
@@ -14,6 +15,8 @@ export default async function ManageProducerPage({
   searchParams: Promise<{ 
     name?: string;
     status?: string;
+    farmsPage?: string;
+    farmsSize?: string;
   }>
 }) {
   const resolvedParams = await params;
@@ -22,6 +25,8 @@ export default async function ManageProducerPage({
   const userId = resolvedParams.id;
   const userName = resolvedSearchParams.name || 'Usuário';
   const status = resolvedSearchParams.status || 'Ativo';
+  const farmsPage = parseInt(resolvedSearchParams.farmsPage || '0', 10);
+  const farmsSize = parseInt(resolvedSearchParams.farmsSize || '3', 10);
 
   let userData = null;
   let userError = null;
@@ -30,6 +35,15 @@ export default async function ManageProducerPage({
   } catch (error) {
     console.error('[ManageProducerPage] Erro ao buscar dados do usuário:', error);
     userError = 'Erro ao carregar informações do produtor';
+  }
+
+  let farmsData = null;
+  let farmsError = null;
+  try {
+    farmsData = await listFarms(userId, farmsPage, farmsSize);
+  } catch (error) {
+    console.error('[ManageProducerPage] Erro ao buscar fazendas:', error);
+    farmsError = 'Erro ao carregar fazendas';
   }
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
@@ -65,7 +79,7 @@ export default async function ManageProducerPage({
             variant="outline"
             className="h-11 px-5 font-medium"
           >
-            Criar Vínculos
+            Gerenciar Vínculos
           </Button>
 
           <div className="w-48 h-11">
@@ -75,6 +89,24 @@ export default async function ManageProducerPage({
       </div>
 
       <ProducerDataForm userData={userData} error={userError} />
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Fazendas Cadastradas</h2>
+        {farmsError ? (
+          <div className="bg-white rounded-lg border border-gray-100 p-8 shadow-sm">
+            <p className="text-center text-red-600">{farmsError}</p>
+          </div>
+        ) : (
+          <FarmsTable 
+            farms={farmsData?.content || []}
+            userId={userId}
+            currentPage={farmsPage}
+            pageSize={farmsSize}
+            totalElements={farmsData?.totalElements || 0}
+            totalPages={farmsData?.totalPages || 0}
+          />
+        )}
+      </div>
     </div>
   );
 }

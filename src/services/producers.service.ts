@@ -35,6 +35,27 @@ export interface UserInfoResponse {
   state: string | null;
 }
 
+export interface FarmResponse {
+  id: number;
+  name: string;
+  ownerId: number;
+  active: boolean;
+  statusLabel: string;
+  city: string;
+  state: string;
+  productionUnits: null;
+  cropTypes: string[];
+  cropTypesSummary: string;
+}
+
+export interface FarmsListResponse {
+  content: FarmResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 export async function listProducers(
   page: number = 0,
   size: number = 10,
@@ -98,4 +119,45 @@ export async function getUserInfo(userId: string): Promise<UserInfoResponse> {
   const data = await response.json();
   console.log('[getUserInfo] Dados recebidos com sucesso');
   return data;
+}
+
+export async function listFarms(
+  ownerId: string,
+  page: number = 0,
+  size: number = 20
+): Promise<FarmsListResponse> {
+  console.log('[listFarms] Buscando fazendas do produtor:', ownerId);
+  
+  const params = new URLSearchParams();
+  params.append('ownerId', ownerId);
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+
+  const endpoint = `/api/backoffice/farms/list?${params.toString()}`;
+  const response = await apiFetch(endpoint);
+  
+  console.log('[listFarms] Status da resposta:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[listFarms] Erro na resposta:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    const error = new Error(errorData.message || 'Erro ao buscar fazendas') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  console.log('[listFarms] Dados recebidos com sucesso');
+  
+  return {
+    content: data.content || [],
+    totalElements: data.totalElements || 0,
+    totalPages: data.totalPages || 0,
+    size: data.size || 20,
+    number: data.number || 0,
+  };
 }
