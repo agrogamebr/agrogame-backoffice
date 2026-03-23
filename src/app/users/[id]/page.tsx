@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
-import { getUserInfo, listFarms } from '@/services/producers.service';
+import { ProductionUnitsTable } from '@/components/producers/ProductionUnitsTable';
+import { getUserInfo, listFarms, listProductionUnits } from '@/services/producers.service';
 
 export default async function ManageProducerPage({ 
   params,
@@ -17,6 +18,8 @@ export default async function ManageProducerPage({
     status?: string;
     farmsPage?: string;
     farmsSize?: string;
+    unitsPage?: string;
+    unitsSize?: string;
   }>
 }) {
   const resolvedParams = await params;
@@ -26,7 +29,9 @@ export default async function ManageProducerPage({
   const userName = resolvedSearchParams.name || 'Usuário';
   const status = resolvedSearchParams.status || 'Ativo';
   const farmsPage = parseInt(resolvedSearchParams.farmsPage || '0', 10);
-  const farmsSize = parseInt(resolvedSearchParams.farmsSize || '3', 10);
+  const farmsSize = parseInt(resolvedSearchParams.farmsSize || '5', 10);
+  const unitsPage = parseInt(resolvedSearchParams.unitsPage || '0', 10);
+  const unitsSize = parseInt(resolvedSearchParams.unitsSize || '5', 10);
 
   let userData = null;
   let userError = null;
@@ -44,6 +49,15 @@ export default async function ManageProducerPage({
   } catch (error) {
     console.error('[ManageProducerPage] Erro ao buscar fazendas:', error);
     farmsError = 'Erro ao carregar fazendas';
+  }
+
+  let productionUnitsData = null;
+  let productionUnitsError = null;
+  try {
+    productionUnitsData = await listProductionUnits(userId, unitsPage, unitsSize);
+  } catch (error) {
+    console.error('[ManageProducerPage] Erro ao buscar unidades produtivas:', error);
+    productionUnitsError = 'Erro ao carregar unidades produtivas';
   }
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
@@ -104,6 +118,24 @@ export default async function ManageProducerPage({
             pageSize={farmsSize}
             totalElements={farmsData?.totalElements || 0}
             totalPages={farmsData?.totalPages || 0}
+          />
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Unidades Produtivas</h2>
+        {productionUnitsError ? (
+          <div className="bg-white rounded-lg border border-gray-100 p-8 shadow-sm">
+            <p className="text-center text-red-600">{productionUnitsError}</p>
+          </div>
+        ) : (
+          <ProductionUnitsTable 
+            productionUnits={productionUnitsData?.content || []}
+            userId={userId}
+            currentPage={unitsPage}
+            pageSize={unitsSize}
+            totalElements={productionUnitsData?.totalElements || 0}
+            totalPages={productionUnitsData?.totalPages || 0}
           />
         )}
       </div>

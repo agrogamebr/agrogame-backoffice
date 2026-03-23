@@ -56,6 +56,33 @@ export interface FarmsListResponse {
   number: number;
 }
 
+export interface ProductionUnitResponse {
+  id: number;
+  farmId: number;
+  farmName: string;
+  productionUnitTypeId: number;
+  productionUnitTypeName: string;
+  productionUnitTypeCode: string;
+  name: string;
+  description: string;
+  area: number;
+  isActive: boolean;
+  createdAt: string;
+  deactivatedAt: string | null;
+  cropTypeId: number;
+  cropTypeName: string;
+  thumbnailGsUrl: string | null;
+  city: string;
+}
+
+export interface ProductionUnitsListResponse {
+  content: ProductionUnitResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 export async function listProducers(
   page: number = 0,
   size: number = 10,
@@ -152,6 +179,47 @@ export async function listFarms(
 
   const data = await response.json();
   console.log('[listFarms] Dados recebidos com sucesso');
+  
+  return {
+    content: data.content || [],
+    totalElements: data.totalElements || 0,
+    totalPages: data.totalPages || 0,
+    size: data.size || 20,
+    number: data.number || 0,
+  };
+}
+
+export async function listProductionUnits(
+  ownerId: string,
+  page: number = 0,
+  size: number = 20
+): Promise<ProductionUnitsListResponse> {
+  console.log('[listProductionUnits] Buscando unidades produtivas do produtor:', ownerId);
+  
+  const params = new URLSearchParams();
+  params.append('ownerId', ownerId);
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+
+  const endpoint = `/api/backoffice/production-units/list?${params.toString()}`;
+  const response = await apiFetch(endpoint);
+  
+  console.log('[listProductionUnits] Status da resposta:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[listProductionUnits] Erro na resposta:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    const error = new Error(errorData.message || 'Erro ao buscar unidades produtivas') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  console.log('[listProductionUnits] Dados recebidos com sucesso');
   
   return {
     content: data.content || [],
