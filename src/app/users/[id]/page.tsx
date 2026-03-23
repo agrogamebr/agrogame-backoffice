@@ -6,7 +6,8 @@ import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
 import { ProductionUnitsTable } from '@/components/producers/ProductionUnitsTable';
-import { getUserInfo, listFarms, listProductionUnits } from '@/services/producers.service';
+import { WorkersTable } from '@/components/producers/WorkersTable';
+import { getUserInfo, listFarms, listProductionUnits, listWorkers } from '@/services/producers.service';
 
 export default async function ManageProducerPage({ 
   params,
@@ -20,6 +21,8 @@ export default async function ManageProducerPage({
     farmsSize?: string;
     unitsPage?: string;
     unitsSize?: string;
+    workersPage?: string;
+    workersSize?: string;
   }>
 }) {
   const resolvedParams = await params;
@@ -32,6 +35,8 @@ export default async function ManageProducerPage({
   const farmsSize = parseInt(resolvedSearchParams.farmsSize || '5', 10);
   const unitsPage = parseInt(resolvedSearchParams.unitsPage || '0', 10);
   const unitsSize = parseInt(resolvedSearchParams.unitsSize || '5', 10);
+  const workersPage = parseInt(resolvedSearchParams.workersPage || '0', 10);
+  const workersSize = parseInt(resolvedSearchParams.workersSize || '5', 10);
 
   let userData = null;
   let userError = null;
@@ -58,6 +63,15 @@ export default async function ManageProducerPage({
   } catch (error) {
     console.error('[ManageProducerPage] Erro ao buscar unidades produtivas:', error);
     productionUnitsError = 'Erro ao carregar unidades produtivas';
+  }
+
+  let workersData = null;
+  let workersError = null;
+  try {
+    workersData = await listWorkers(userId, workersPage, workersSize);
+  } catch (error) {
+    console.error('[ManageProducerPage] Erro ao buscar funcionários:', error);
+    workersError = 'Erro ao carregar funcionários';
   }
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
@@ -136,6 +150,24 @@ export default async function ManageProducerPage({
             pageSize={unitsSize}
             totalElements={productionUnitsData?.totalElements || 0}
             totalPages={productionUnitsData?.totalPages || 0}
+          />
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Funcionários Cadastrados</h2>
+        {workersError ? (
+          <div className="bg-white rounded-lg border border-gray-100 p-8 shadow-sm">
+            <p className="text-center text-red-600">{workersError}</p>
+          </div>
+        ) : (
+          <WorkersTable 
+            workers={workersData?.content || []}
+            userId={userId}
+            currentPage={workersPage}
+            pageSize={workersSize}
+            totalElements={workersData?.totalElements || 0}
+            totalPages={workersData?.totalPages || 0}
           />
         )}
       </div>

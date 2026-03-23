@@ -83,6 +83,22 @@ export interface ProductionUnitsListResponse {
   number: number;
 }
 
+export interface WorkerResponse {
+  id: number;
+  fullname: string;
+  email: string;
+  farmId: number;
+  farmName: string;
+}
+
+export interface WorkersListResponse {
+  content: WorkerResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 export async function listProducers(
   page: number = 0,
   size: number = 10,
@@ -220,6 +236,47 @@ export async function listProductionUnits(
 
   const data = await response.json();
   console.log('[listProductionUnits] Dados recebidos com sucesso');
+  
+  return {
+    content: data.content || [],
+    totalElements: data.totalElements || 0,
+    totalPages: data.totalPages || 0,
+    size: data.size || 20,
+    number: data.number || 0,
+  };
+}
+
+export async function listWorkers(
+  ownerId: string,
+  page: number = 0,
+  size: number = 20
+): Promise<WorkersListResponse> {
+  console.log('[listWorkers] Buscando funcionários do produtor:', ownerId);
+  
+  const params = new URLSearchParams();
+  params.append('ownerId', ownerId);
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+
+  const endpoint = `/api/backoffice/workers/list?${params.toString()}`;
+  const response = await apiFetch(endpoint);
+  
+  console.log('[listWorkers] Status da resposta:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[listWorkers] Erro na resposta:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    const error = new Error(errorData.message || 'Erro ao buscar funcionários') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  console.log('[listWorkers] Dados recebidos com sucesso');
   
   return {
     content: data.content || [],
