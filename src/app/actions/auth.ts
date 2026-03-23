@@ -132,3 +132,33 @@ export async function changePasswordAction(
     };
   }
 }
+
+// Action para troca de senha voluntária (não faz logout)
+export async function changePasswordVoluntaryAction(
+  formData: FormData
+): Promise<ChangePasswordState> {
+  const newPassword = formData.get('newPassword') as string;
+
+  if (!newPassword) {
+    return { error: 'Por favor, informe a nova senha.' };
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+      return { error: 'Sessão expirada. Por favor, faça login novamente.' };
+    }
+
+    const response = await changeTemporaryPassword(token, newPassword);
+
+    return { success: true, message: response.message };
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Change password error:', err);
+    return {
+      error: err.message || 'Erro ao alterar senha. Tente novamente.',
+    };
+  }
+}

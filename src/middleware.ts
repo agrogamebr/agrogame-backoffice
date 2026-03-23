@@ -33,6 +33,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow access to profile/change-password page if user is authenticated
+  if (pathname === '/profile/change-password') {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    // If user has forced password change, redirect to forced change page
+    if (forceChangePassword === 'true') {
+      return NextResponse.redirect(new URL('/change-password', request.url));
+    }
+    return NextResponse.next();
+  }
+
   // Root path handling
   if (pathname === '/') {
     if (token) {
