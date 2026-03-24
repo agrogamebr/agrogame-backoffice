@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, HelpCircle, User, LogOut, Search } from 'lucide-react';
+import { Bell, HelpCircle, User, LogOut, Key } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MobileMenuButton } from './MobileMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import LogoutModal from './LogoutModal';
@@ -18,10 +19,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { logout } = useAuth();
+  const router = useRouter();
 
   const handleLogoutClick = () => {
     setIsProfileOpen(false);
     setIsLogoutModalOpen(true);
+  };
+
+  const handleChangePasswordClick = () => {
+    setIsProfileOpen(false);
+    router.push('/profile/change-password');
   };
 
   const handleConfirmLogout = async () => {
@@ -115,15 +122,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
                       <p className="text-sm font-medium text-gray-900">Minha Conta</p>
                     </div>
                     <Button
-                      onClick={() => {
-                        setIsProfileOpen(false);
-                        // Navigate to profile if needed
-                      }}
+                      onClick={handleChangePasswordClick}
                       variant="ghost"
                       className="w-full justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 gap-2 h-auto"
                     >
-                      <User className="w-4 h-4" />
-                      Meus Dados
+                      <Key className="w-4 h-4" />
+                      Trocar Senha
                     </Button>
                     <Button
                       onClick={handleLogoutClick}
