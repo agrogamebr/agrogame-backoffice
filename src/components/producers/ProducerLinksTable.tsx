@@ -16,8 +16,8 @@ export interface ProducerLink {
   statusId: number;
   statusName: string;
   createdAt: string;
-  approvalDate?: string | null;
-  approvedBy?: string | null;
+  updatedAt?: string | null;
+  approvedByName?: string | null;
   rejectionReason?: string | null;
 }
 
@@ -141,10 +141,10 @@ export function ProducerLinksTable({
                 </TableCell>
                 <TableCell className="font-medium">{link.fullName}</TableCell>
                 <TableCell>
-                  {isApproved || isRejected ? formatDate(link.approvalDate) : '-'}
+                  {isApproved || isRejected ? formatDate(link.updatedAt) : '-'}
                 </TableCell>
                 <TableCell>
-                  {isApproved || isRejected ? (link.approvedBy || '-') : '-'}
+                  {isApproved || isRejected ? (link.approvedByName || '-') : '-'}
                 </TableCell>
                 <TableCell>
                   {isRejected && link.rejectionReason ? (
