@@ -98,7 +98,7 @@ export function CompletedActivitiesTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={statusBadgeVariant[submission.status] || 'rascunho'}>
+                  <Badge variant={statusBadgeVariant[submission.status] || 'pendente'}>
                     {submission.status === 'submitted' ? 'Pendente' : submission.status}
                   </Badge>
                 </TableCell>

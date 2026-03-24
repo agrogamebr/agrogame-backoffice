@@ -99,6 +99,26 @@ export interface WorkersListResponse {
   number: number;
 }
 
+export interface ProducerLinkResponse {
+  userId: number;
+  fullName: string;
+  cpf: string | null;
+  statusId: number;
+  statusName: string;
+  createdAt: string;
+  approvalDate?: string | null;
+  approvedBy?: string | null;
+  rejectionReason?: string | null;
+}
+
+export interface ProducerLinksListResponse {
+  content: ProducerLinkResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 export async function listProducers(
   page: number = 0,
   size: number = 10,
@@ -283,6 +303,47 @@ export async function listWorkers(
     totalElements: data.totalElements || 0,
     totalPages: data.totalPages || 0,
     size: data.size || 20,
+    number: data.number || 0,
+  };
+}
+
+export async function listProducerLinks(
+  producerId: string,
+  page: number = 0,
+  size: number = 5
+): Promise<ProducerLinksListResponse> {
+  console.log('[listProducerLinks] Buscando vínculos do produtor:', producerId);
+  
+  const params = new URLSearchParams();
+  params.append('producerId', producerId);
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+
+  const endpoint = `/api/backoffice/producers/list?${params.toString()}`;
+  const response = await apiFetch(endpoint);
+  
+  console.log('[listProducerLinks] Status da resposta:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[listProducerLinks] Erro na resposta:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    const error = new Error(errorData.message || 'Erro ao buscar vínculos') as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  console.log('[listProducerLinks] Dados recebidos com sucesso');
+  
+  return {
+    content: data.content || [],
+    totalElements: data.totalElements || 0,
+    totalPages: data.totalPages || 0,
+    size: data.size || 5,
     number: data.number || 0,
   };
 }

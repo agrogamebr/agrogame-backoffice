@@ -27,10 +27,10 @@ interface FarmsTableProps {
   totalPages: number;
 }
 
-const statusBadgeVariant: Record<string, "enviado" | "rascunho" | "excluida"> = {
+const statusBadgeVariant: Record<string, "enviado" | "pendente" | "excluida"> = {
   'ATIVA': 'enviado',
   'INATIVA': 'excluida',
-  'PENDENTE': 'rascunho',
+  'PENDENTE': 'pendente',
 };
 
 export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements, totalPages }: FarmsTableProps) {
@@ -114,7 +114,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
               className="hover:bg-gray-50 transition-colors"
             >
               <TableCell>
-                <Badge variant={statusBadgeVariant[farm.statusLabel] || 'rascunho'}>
+                <Badge variant={statusBadgeVariant[farm.statusLabel] || 'pendente'}>
                   {farm.statusLabel}
                 </Badge>
               </TableCell>

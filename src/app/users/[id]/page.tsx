@@ -1,7 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
@@ -76,13 +75,13 @@ export default async function ManageProducerPage({
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
 
-  const statusBadgeVariant: Record<ProducerStatus, "enviado" | "rascunho" | "excluida"> = {
+  const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
     'Ativo': 'enviado',
     'Aprovado': 'enviado',
     'Inativo': 'excluida',
     'Rejeitado': 'excluida',
-    'Pendente': 'rascunho',
-    'Suspenso': 'rascunho',
+    'Pendente': 'pendente',
+    'Suspenso': 'pendente',
   };
 
   return (
@@ -103,12 +102,12 @@ export default async function ManageProducerPage({
         </div>
 
         <div className="flex items-center gap-5">
-          <Button
-            variant="outline"
-            className="h-11 px-5 font-medium"
+          <Link
+            href={`/users/${userId}/vinculos?name=${encodeURIComponent(userName)}`}
+            className="inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white border-2 border-[#0B63E5] text-[#0B63E5] hover:bg-blue-50 focus:ring-[#0B63E5] shadow-none px-5 py-3 text-base h-11 cursor-pointer"
           >
             Gerenciar Vínculos
-          </Button>
+          </Link>
 
           <div className="w-48 h-11">
             <ProducerDataFilter userId={userId} />

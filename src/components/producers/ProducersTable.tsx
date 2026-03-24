@@ -29,13 +29,13 @@ interface ProducersTableProps {
   totalPages: number;
 }
 
-const statusBadgeVariant: Record<ProducerStatus, "enviado" | "rascunho" | "excluida"> = {
+const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
   'Aprovado': 'enviado',
   'Ativo': 'enviado',
-  'Pendente': 'rascunho',
+  'Pendente': 'pendente',
   'Rejeitado': 'excluida',
   'Inativo': 'excluida',
-  'Suspenso': 'rascunho',
+  'Suspenso': 'pendente',
 };
 
 export function ProducersTable({
