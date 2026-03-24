@@ -101,17 +101,8 @@ export default async function ManageProducerPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-5">
-          <Link
-            href={`/users/${userId}/vinculos?name=${encodeURIComponent(userName)}`}
-            className="inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white border-2 border-[#0B63E5] text-[#0B63E5] hover:bg-blue-50 focus:ring-[#0B63E5] shadow-none px-5 py-3 text-base h-11 cursor-pointer"
-          >
-            Gerenciar Vínculos
-          </Link>
-
-          <div className="w-48 h-11">
-            <ProducerDataFilter userId={userId} />
-          </div>
+        <div className="w-48 h-11">
+          <ProducerDataFilter userId={userId} />
         </div>
       </div>
 

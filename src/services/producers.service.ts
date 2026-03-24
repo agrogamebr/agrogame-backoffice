@@ -308,16 +308,26 @@ export async function listWorkers(
 }
 
 export async function listProducerLinks(
-  producerId: string,
   page: number = 0,
-  size: number = 5
+  size: number = 5,
+  filters?: {
+    name?: string;
+    cpf?: string;
+    statusId?: number;
+  }
 ): Promise<ProducerLinksListResponse> {
-  console.log('[listProducerLinks] Buscando vínculos do produtor:', producerId);
+  console.log('[listProducerLinks] Buscando vínculos');
   
   const params = new URLSearchParams();
-  params.append('producerId', producerId);
   params.append('page', page.toString());
   params.append('size', size.toString());
+
+  // Add filter parameters if provided
+  if (filters) {
+    if (filters.name) params.append('name', filters.name);
+    if (filters.cpf) params.append('cpf', filters.cpf);
+    if (filters.statusId) params.append('statusId', filters.statusId.toString());
+  }
 
   const endpoint = `/api/backoffice/producers/list?${params.toString()}`;
   const response = await apiFetch(endpoint);

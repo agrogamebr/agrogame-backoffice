@@ -6,6 +6,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { Button } from '@/components/ui/Button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { approveProducerLinkAction } from '@/app/actions/producer-links';
+import { useToast } from '@/components/ui/Toast';
 
 export interface ProducerLink {
   userId: number;
@@ -21,7 +23,6 @@ export interface ProducerLink {
 
 interface ProducerLinksTableProps {
   links: ProducerLink[];
-  producerId: string;
   currentPage: number;
   pageSize: number;
   totalElements: number;
@@ -37,7 +38,6 @@ const statusBadgeVariant: Record<string, "enviado" | "pendente" | "excluida"> = 
 
 export function ProducerLinksTable({ 
   links, 
-  producerId, 
   currentPage, 
   pageSize, 
   totalElements, 
@@ -45,31 +45,37 @@ export function ProducerLinksTable({
 }: ProducerLinksTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { addToast } = useToast();
   const [isApproving, setIsApproving] = useState<number | null>(null);
   const [isRejecting, setIsRejecting] = useState<number | null>(null);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
-    router.push(`/users/${producerId}/vinculos?${params.toString()}`);
+    router.push(`/vinculos?${params.toString()}`);
   };
 
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('size', size.toString());
     params.set('page', '0');
-    router.push(`/users/${producerId}/vinculos?${params.toString()}`);
+    router.push(`/vinculos?${params.toString()}`);
   };
 
   const handleApprove = async (linkUserId: number) => {
     setIsApproving(linkUserId);
     try {
-      // TODO: Implementar chamada à API para aprovar
-      console.log('Aprovando vínculo:', linkUserId);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simular chamada API
-      router.refresh();
+      const result = await approveProducerLinkAction(linkUserId);
+      
+      if (result.success) {
+        addToast(result.message || 'Vínculo aprovado com sucesso', 'success', 5000);
+        router.refresh();
+      } else {
+        addToast(result.error || 'Erro ao aprovar vínculo', 'error', 5000);
+      }
     } catch (error) {
       console.error('Erro ao aprovar vínculo:', error);
+      addToast('Erro ao aprovar vínculo', 'error', 5000);
     } finally {
       setIsApproving(null);
     }
