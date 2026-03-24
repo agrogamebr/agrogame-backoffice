@@ -92,7 +92,7 @@ export function WorkersTable({
             <TableHead className="w-[30%]">NOME DO FUNCIONÁRIO</TableHead>
             <TableHead className="w-[35%]">EMAIL</TableHead>
             <TableHead className="w-[25%]">FAZENDA</TableHead>
-            <TableHead className="w-[10%] text-center">AÇÕES</TableHead>
+            {/* <TableHead className="w-[10%] text-center">AÇÕES</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -110,7 +110,7 @@ export function WorkersTable({
               <TableCell className="text-gray-700">
                 <span className="text-sm">{worker.farmName}</span>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className="flex items-center justify-center gap-2">
                   <div className="relative">
                     <Button
@@ -149,7 +149,7 @@ export function WorkersTable({
                     )}
                   </div>
                 </div>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>

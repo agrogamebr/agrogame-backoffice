@@ -86,7 +86,7 @@ export default async function ManageProducerPage({
   };
 
   return (
-    <div className="max-w-8xl mx-4 space-y-4 pt-14 pb-8 overflow-y-auto max-h-screen">
+    <div className="max-w-8xl mx-4 space-y-4 pt-14 pb-8">
       <div className="flex items-center justify-between gap-5 mb-6">
         <div className="flex items-center gap-4">
           <Link href="/users" className="text-gray-600 hover:text-gray-900 cursor-pointer">

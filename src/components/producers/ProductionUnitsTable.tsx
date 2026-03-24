@@ -92,7 +92,7 @@ export function ProductionUnitsTable({
             <TableHead className="w-[35%]">NOME DA UNIDADE PRODUTIVA</TableHead>
             <TableHead className="w-[30%]">NOME DA FAZENDA</TableHead>
             <TableHead className="w-[25%]">CIDADE</TableHead>
-            <TableHead className="w-[10%] text-center">AÇÕES</TableHead>
+            {/* <TableHead className="w-[10%] text-center">AÇÕES</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -110,7 +110,7 @@ export function ProductionUnitsTable({
               <TableCell className="text-gray-700">
                 <span className="text-sm">{unit.city}</span>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className="flex items-center justify-center gap-2">
                   <div className="relative">
                     <Button
@@ -149,7 +149,7 @@ export function ProductionUnitsTable({
                     )}
                   </div>
                 </div>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>

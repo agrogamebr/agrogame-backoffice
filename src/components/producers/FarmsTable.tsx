@@ -104,7 +104,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
             <TableHead className="w-[28%]">CULTURAS</TableHead>
             <TableHead className="w-[15%]">MUNICÍPIO</TableHead>
             <TableHead className="w-[10%]">UF</TableHead>
-            <TableHead className="w-[10%] text-center">AÇÕES</TableHead>
+            {/* <TableHead className="w-[10%] text-center">AÇÕES</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -130,7 +130,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
               <TableCell className="text-gray-700">
                 <span className="text-sm font-medium">{farm.state}</span>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className="flex items-center justify-center gap-2">
                   <div className="relative">
                     <Button
@@ -169,7 +169,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
                     )}
                   </div>
                 </div>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
