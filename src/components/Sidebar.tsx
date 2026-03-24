@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, ListTodo, FileCheck } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, FileCheck, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const baseMenuItems = [
   { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
   { icon: Users, href: '/users', label: 'Usuários' },
+  { icon: Link2, href: '/vinculos', label: 'Vínculos' },
   { icon: ListTodo, href: '/activities', label: 'Atividades' },
 ];
 

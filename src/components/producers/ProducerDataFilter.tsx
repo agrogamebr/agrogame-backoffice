@@ -4,26 +4,27 @@ import { ChevronDown, Filter, X } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { FILTERABLE_STATUSES } from '@/types/producer-status';
 
 interface FilterOptions {
-  name: string;
-  cpf: string;
-  statusId: string;
+  documentType: string;
 }
 
-export function ProducersFilter() {
+interface ProducerDataFilterProps {
+  userId: string;
+}
+
+export function ProducerDataFilter({
+  userId,
+}: ProducerDataFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
   const [filters, setFilters] = useState<FilterOptions>({
-    name: searchParams.get('name') || '',
-    cpf: searchParams.get('cpf') || '',
-    statusId: searchParams.get('statusId') || '',
+    documentType: searchParams.get('documentType') || '',
   });
 
-  const hasActiveFilters = filters.name || filters.cpf || filters.statusId;
+  const hasActiveFilters = filters.documentType;
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -32,10 +33,6 @@ export function ProducersFilter() {
   const handleApply = () => {
     const params = new URLSearchParams(searchParams);
     
-    // Reset to first page when applying filters
-    params.set('page', '0');
-    
-    // Update or remove filter params
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
         params.set(key, value);
@@ -44,26 +41,21 @@ export function ProducersFilter() {
       }
     });
 
-    router.push(`/users?${params.toString()}`);
+    router.push(`/users/${userId}?${params.toString()}`);
     setIsOpen(false);
   };
 
   const handleClear = () => {
     setFilters({
-      name: '',
-      cpf: '',
-      statusId: '',
+      documentType: '',
     });
   };
 
   const handleReset = () => {
     handleClear();
     const params = new URLSearchParams(searchParams);
-    params.delete('name');
-    params.delete('cpf');
-    params.delete('statusId');
-    params.set('page', '0');
-    router.push(`/users?${params.toString()}`);
+    params.delete('documentType');
+    router.push(`/users/${userId}?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -100,45 +92,17 @@ export function ProducersFilter() {
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Nome
-                </label>
-                <input
-                  type="text"
-                  value={filters.name}
-                  onChange={(e) => handleFilterChange('name', e.target.value)}
-                  placeholder="Buscar por nome"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  value={filters.cpf}
-                  onChange={(e) => handleFilterChange('cpf', e.target.value)}
-                  placeholder="000.000.000-00"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Status do Cadastro
+                  Tipo de Documento
                 </label>
                 <select
-                  value={filters.statusId}
-                  onChange={(e) => handleFilterChange('statusId', e.target.value)}
+                  value={filters.documentType}
+                  onChange={(e) => handleFilterChange('documentType', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Todos</option>
-                  {FILTERABLE_STATUSES.map((status) => (
-                    <option key={status.id} value={status.id}>
-                      {status.label}
-                    </option>
-                  ))}
+                  <option value="cpf">CPF</option>
+                  <option value="rg">RG</option>
+                  <option value="cnh">CNH</option>
                 </select>
               </div>
             </div>

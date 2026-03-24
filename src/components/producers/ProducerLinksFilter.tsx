@@ -4,39 +4,26 @@ import { ChevronDown, Filter, X } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { FILTERABLE_STATUSES } from '@/types/producer-status';
 
 interface FilterOptions {
-  farmId: string;
-  productionUnitId: string;
-  operationType: string;
-  startDate: string;
-  endDate: string;
+  name: string;
+  cpf: string;
+  statusId: string;
 }
 
-interface PointsStatementFilterProps {
-  userId: string;
-  farms: { id: number; name: string }[];
-  productionUnits: { id: number; name: string }[];
-}
-
-export function PointsStatementFilter({
-  userId,
-  farms,
-  productionUnits,
-}: PointsStatementFilterProps) {
+export function ProducerLinksFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
   const [filters, setFilters] = useState<FilterOptions>({
-    farmId: searchParams.get('farmId') || '',
-    productionUnitId: searchParams.get('productionUnitId') || '',
-    operationType: searchParams.get('operationType') || '',
-    startDate: searchParams.get('startDate') || '',
-    endDate: searchParams.get('endDate') || '',
+    name: searchParams.get('name') || '',
+    cpf: searchParams.get('cpf') || '',
+    statusId: searchParams.get('statusId') || '',
   });
 
-  const hasActiveFilters = filters.farmId || filters.productionUnitId || filters.operationType || filters.startDate || filters.endDate;
+  const hasActiveFilters = filters.name || filters.cpf || filters.statusId;
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -57,30 +44,26 @@ export function PointsStatementFilter({
       }
     });
 
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/vinculos?${params.toString()}`);
     setIsOpen(false);
   };
 
   const handleClear = () => {
     setFilters({
-      farmId: '',
-      productionUnitId: '',
-      operationType: '',
-      startDate: '',
-      endDate: '',
+      name: '',
+      cpf: '',
+      statusId: '',
     });
   };
 
   const handleReset = () => {
     handleClear();
     const params = new URLSearchParams(searchParams);
-    params.delete('farmId');
-    params.delete('productionUnitId');
-    params.delete('operationType');
-    params.delete('startDate');
-    params.delete('endDate');
+    params.delete('name');
+    params.delete('cpf');
+    params.delete('statusId');
     params.set('page', '0');
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/vinculos?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -117,77 +100,46 @@ export function PointsStatementFilter({
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Fazenda
+                  Nome
                 </label>
-                <select
-                  value={filters.farmId}
-                  onChange={(e) => handleFilterChange('farmId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Todas</option>
-                  {farms.map((farm) => (
-                    <option key={farm.id} value={farm.id}>
-                      {farm.name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={filters.name}
+                  onChange={(e) => handleFilterChange('name', e.target.value)}
+                  placeholder="Buscar por nome"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Unidade de Produção
+                  CPF
                 </label>
-                <select
-                  value={filters.productionUnitId}
-                  onChange={(e) => handleFilterChange('productionUnitId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Todas</option>
-                  {productionUnits.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  value={filters.cpf}
+                  onChange={(e) => handleFilterChange('cpf', e.target.value)}
+                  placeholder="000.000.000-00"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Tipo de Operação
+                  Status do Vínculo
                 </label>
                 <select
-                  value={filters.operationType}
-                  onChange={(e) => handleFilterChange('operationType', e.target.value)}
+                  value={filters.statusId}
+                  onChange={(e) => handleFilterChange('statusId', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Todos</option>
-                  <option value="earn">Crédito</option>
-                  <option value="spend">Débito</option>
+                  {FILTERABLE_STATUSES.map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.label}
+                    </option>
+                  ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Data Inicial
-                </label>
-                <input
-                  type="date"
-                  value={filters.startDate}
-                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                  Data Final
-                </label>
-                <input
-                  type="date"
-                  value={filters.endDate}
-                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
               </div>
             </div>
 

@@ -303,7 +303,7 @@ export function CreateActivityForm({
     <div className="max-w-8xl mx-4 space-y-6 pt-10 pb-16">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Link href="/activities" className="font-semibold text-gray-700 hover:text-[#0B63E5]">
+          <Link href="/activities" className="font-semibold text-gray-700 hover:text-[#0B63E5] cursor-pointer">
             Gerenciamento de atividades
           </Link>
           <span className="text-gray-400">&gt;</span>
@@ -477,7 +477,7 @@ export function CreateActivityForm({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
           <Link
             href="/activities"
-            className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+            className="text-sm font-semibold text-gray-600 hover:text-gray-900 cursor-pointer"
             tabIndex={isLoading ? -1 : undefined}
           >
             {isViewMode ? 'Voltar' : 'Cancelar'}

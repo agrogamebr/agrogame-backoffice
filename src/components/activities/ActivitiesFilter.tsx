@@ -161,7 +161,7 @@ export function ActivitiesFilter({
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40"
+          className="fixed inset-0 bg-black/20 z-40 cursor-pointer"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -284,15 +284,15 @@ export function ActivitiesFilter({
           <div className="flex gap-3 pt-4 border-t border-gray-200">
             <Button
               onClick={handleClearFilters}
-              variant="secondary"
-              className="flex-1 border border-gray-300"
+              variant="ghost"
+              className="flex-1 border-2 border-[#0B63E5] bg-white text-[#0B63E5] hover:bg-blue-50 font-medium py-2.5"
             >
               Limpar filtros
             </Button>
             <Button
               onClick={handleApplyFilters}
               variant="primary"
-              className="flex-1 bg-[#0B63E5] hover:bg-[#0951bd]"
+              className="flex-1 bg-[#0B63E5] hover:bg-[#0951bd] font-medium py-2.5"
             >
               Aplicar filtros
             </Button>

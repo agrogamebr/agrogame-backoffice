@@ -50,17 +50,17 @@ export function PointsStatementTable({
     router.push(`/users/${userId}/extrato?${params.toString()}`);
   };
 
-  const getStatusBadge = (operationType: string) => {
+  const getOperationTypeBadge = (operationType: string) => {
     if (operationType === 'Crédito') {
       return (
         <Badge variant="enviado" className="w-22.5">
-          Campanha
+          Crédito
         </Badge>
       );
     }
     return (
       <Badge variant="excluida" className="w-22.5">
-        Resgate
+        Débito
       </Badge>
     );
   };
@@ -83,23 +83,20 @@ export function PointsStatementTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[10%]">STATUS</TableHead>
-            <TableHead className="w-[20%]">DESCRIÇÃO DO EVENTO</TableHead>
-            <TableHead className="w-[18%]">FAZENDA</TableHead>
-            <TableHead className="w-[18%]">UNIDADE DE PRODUÇÃO</TableHead>
             <TableHead className="w-[15%]">TIPO DE OPERAÇÃO</TableHead>
-            <TableHead className="w-[12%] text-right">PONTOS</TableHead>
-            <TableHead className="w-[7%] text-center">AÇÕES</TableHead>
+            <TableHead className="w-[25%]">NOME DA ATIVIDADE</TableHead>
+            <TableHead className="w-[20%]">FAZENDA</TableHead>
+            <TableHead className="w-[20%]">UNIDADE DE PRODUÇÃO</TableHead>
+            <TableHead className="w-[20%] text-right">PONTOS</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item, index) => (
             <TableRow 
               key={`${item.id}-${index}`}
-              className={item.operationType === 'Débito' ? 'border-l-4 border-l-[#C8272A]' : ''}
             >
               <TableCell>
-                {getStatusBadge(item.operationType)}
+                {getOperationTypeBadge(item.operationType)}
               </TableCell>
               <TableCell>
                 <span className="text-sm font-medium text-gray-900">{item.description}</span>
@@ -110,18 +107,8 @@ export function PointsStatementTable({
               <TableCell className="text-gray-700">
                 {item.productionUnitName || '-'}
               </TableCell>
-              <TableCell className="text-gray-700">
-                {item.operationType}
-              </TableCell>
               <TableCell>
                 {getPointsDisplay(item.points, item.operationType)}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center justify-center">
-                  <button className="text-gray-600 hover:text-gray-900">
-                    <span className="text-xl">⋮</span>
-                  </button>
-                </div>
               </TableCell>
             </TableRow>
           ))}

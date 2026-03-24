@@ -11,8 +11,8 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
   const pathname = usePathname();
 
   // Header/Sidebar logic: 
-  // Hidden on root '/' (auth check will redirect) or '/login'.
-  const isLoginPage = pathname === '/' || pathname === '/login';
+  // Hidden on root '/' (auth check will redirect), '/login', or '/change-password'.
+  const isLoginPage = pathname === '/' || pathname === '/login' || pathname === '/change-password';
 
   return (
     <>

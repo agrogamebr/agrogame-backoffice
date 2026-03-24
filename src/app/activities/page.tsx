@@ -95,7 +95,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         <div className="flex items-center gap-3">
           <Link
             href="/activities/create"
-            className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium inline-flex items-center justify-center"
+            className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium inline-flex items-center justify-center cursor-pointer"
           >
             Cadastrar nova atividade
           </Link>
