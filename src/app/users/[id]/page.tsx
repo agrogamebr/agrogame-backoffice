@@ -1,7 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
@@ -76,13 +75,13 @@ export default async function ManageProducerPage({
 
   type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
 
-  const statusBadgeVariant: Record<ProducerStatus, "enviado" | "rascunho" | "excluida"> = {
+  const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
     'Ativo': 'enviado',
     'Aprovado': 'enviado',
     'Inativo': 'excluida',
     'Rejeitado': 'excluida',
-    'Pendente': 'rascunho',
-    'Suspenso': 'rascunho',
+    'Pendente': 'pendente',
+    'Suspenso': 'pendente',
   };
 
   return (
@@ -102,17 +101,8 @@ export default async function ManageProducerPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-5">
-          <Button
-            variant="outline"
-            className="h-11 px-5 font-medium"
-          >
-            Gerenciar Vínculos
-          </Button>
-
-          <div className="w-48 h-11">
-            <ProducerDataFilter userId={userId} />
-          </div>
+        <div className="w-48 h-11">
+          <ProducerDataFilter userId={userId} />
         </div>
       </div>
 
