@@ -4,8 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:staging": "next dev --env .env.staging",
     "build": "next build",
+    "build:staging": "next build",
+    "build:production": "next build",
     "start": "next start",
+    "start:staging": "next start",
+    "start:production": "next start",
     "lint": "eslint"
   },
   "dependencies": {
