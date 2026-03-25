@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/services/auth.service';
+import config from '@/config';
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   let token: string | undefined;
@@ -27,7 +27,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
 
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const fullUrl = `${config.api.baseUrl}${endpoint}`;
 
   const response = await fetch(fullUrl, {
     ...options,
