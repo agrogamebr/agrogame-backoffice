@@ -5,7 +5,7 @@
 
 export const config = {
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://agrogame-api-dev-1017408486443.us-central1.run.app',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://agrogame-api-dev-1017408486443.us-central1.run.app',
   },
   app: {
     name: process.env.NEXT_PUBLIC_APP_NAME || 'Agrogame Backoffice',
