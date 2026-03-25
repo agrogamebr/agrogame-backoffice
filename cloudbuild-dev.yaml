@@ -1,0 +1,43 @@
+steps:
+  # Step 0: Build da imagem Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_ENVIRONMENT=development'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=https://agrogame-api-dev-1017408486443.us-central1.run.app'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_APP_NAME=AgroGame Backoffice Dev'
+      - '.'
+
+  # Step 1: Push da imagem
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+
+
+  # Step 3: Deploy no Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'agrogame-backoffice-dev'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+      - '--service-account'
+      - 'bitbucket-deployer@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--quiet'
+
+timeout: '3600s'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
