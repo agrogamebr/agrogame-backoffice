@@ -6,7 +6,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { Button } from '@/components/ui/Button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { approveProducerLinkAction } from '@/app/actions/producer-links';
+import { proccessProducerLinkAction } from '@/app/actions/producer-links';
 import { useToast } from '@/components/ui/Toast';
 
 export interface ProducerLink {
@@ -16,7 +16,7 @@ export interface ProducerLink {
   statusId: number;
   statusName: string;
   createdAt: string;
-  updatedAt?: string | null;
+  approvedAt?: string | null;
   approvedByName?: string | null;
   rejectionReason?: string | null;
 }
@@ -65,7 +65,7 @@ export function ProducerLinksTable({
   const handleApprove = async (linkUserId: number) => {
     setIsApproving(linkUserId);
     try {
-      const result = await approveProducerLinkAction(linkUserId);
+      const result = await proccessProducerLinkAction(linkUserId, 'approved');
       
       if (result.success) {
         addToast(result.message || 'Vínculo aprovado com sucesso', 'success', 5000);
@@ -84,12 +84,17 @@ export function ProducerLinksTable({
   const handleReject = async (linkUserId: number) => {
     setIsRejecting(linkUserId);
     try {
-      // TODO: Implementar chamada à API para reprovar
-      console.log('Reprovando vínculo:', linkUserId);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simular chamada API
-      router.refresh();
+      const result = await proccessProducerLinkAction(linkUserId, 'rejected');
+      
+      if (result.success) {
+        addToast(result.message || 'Vínculo reprovado com sucesso', 'success', 5000);
+        router.refresh();
+      } else {
+        addToast(result.error || 'Erro ao reprovar vínculo', 'error', 5000);
+      }
     } catch (error) {
       console.error('Erro ao reprovar vínculo:', error);
+      addToast('Erro ao reprovar vínculo', 'error', 5000);
     } finally {
       setIsRejecting(null);
     }
@@ -122,7 +127,7 @@ export function ProducerLinksTable({
             <TableHead>Nome do produtor rural</TableHead>
             <TableHead>Data da aprovação</TableHead>
             <TableHead>Aprovado/Reprovado por</TableHead>
-            <TableHead>Motivo de reprovação</TableHead>
+            {/* <TableHead>Motivo de reprovação</TableHead> */}
             <TableHead className="text-right">AÇÕES</TableHead>
           </TableRow>
         </TableHeader>
@@ -141,12 +146,12 @@ export function ProducerLinksTable({
                 </TableCell>
                 <TableCell className="font-medium">{link.fullName}</TableCell>
                 <TableCell>
-                  {isApproved || isRejected ? formatDate(link.updatedAt) : '-'}
+                  {isApproved || isRejected ? formatDate(link.approvedAt) : '-'}
                 </TableCell>
                 <TableCell>
                   {isApproved || isRejected ? (link.approvedByName || '-') : '-'}
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {isRejected && link.rejectionReason ? (
                     <div className="flex items-center gap-2">
                       <span className="text-gray-500">💬</span>
@@ -155,7 +160,7 @@ export function ProducerLinksTable({
                   ) : (
                     '-'
                   )}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
                   {isPending ? (
                     <div className="flex items-center justify-end gap-2">
