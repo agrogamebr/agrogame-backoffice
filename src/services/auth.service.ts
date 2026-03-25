@@ -1,4 +1,6 @@
-export const API_BASE_URL = 'https://agrogame-api-dev-1017408486443.us-central1.run.app';
+import config from '@/config';
+
+export const API_BASE_URL = config.api.baseUrl;
 
 export interface LoginRequest {
   identifier: string;
