@@ -1,0 +1,37 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_ENVIRONMENT=HML'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=https://hml-api.agribit.com.br/api'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_APP_NAME=AgroGame Backoffice HML'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'agrogame-backoffice-hml'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+      - '--service-account'
+      - 'bitbucket-deployer@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--quiet'
+timeout: '3600s'
+options:
+  logging: CLOUD_LOGGING_ONLY
+images:
+  - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
