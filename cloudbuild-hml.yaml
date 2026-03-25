@@ -1,4 +1,5 @@
 steps:
+  # Step 0: Build da imagem Docker
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -7,14 +8,18 @@ steps:
       - '--build-arg'
       - 'NEXT_PUBLIC_ENVIRONMENT=HML'
       - '--build-arg'
-      - 'NEXT_PUBLIC_API_URL=https://hml-api.agribit.com.br/api'
+      - 'NEXT_PUBLIC_API_URL=https://hml-api.agribit.com.br'
       - '--build-arg'
-      - 'NEXT_PUBLIC_APP_NAME=AgroGame Backoffice HML'
+      - 'NEXT_PUBLIC_APP_NAME=AgroGame Backoffice - HML/STG'
       - '.'
+
+  # Step 1: Push da imagem
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
+
+  # Step 3: Deploy no Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
@@ -30,8 +35,8 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--quiet'
+
 timeout: '3600s'
+
 options:
   logging: CLOUD_LOGGING_ONLY
-images:
-  - 'us-central1-docker.pkg.dev/agrogame/agrogame-repo/agrogame-backoffice:$SHORT_SHA'
