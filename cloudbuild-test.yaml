@@ -1,17 +1,20 @@
 steps:
-  - name: 'node:20'  # Use a versão do Node que seu projeto utiliza
-    entrypoint: 'npm'
-    args: ['install']
-    id: 'Install Dependencies'
+  # 1. Instala as dependências do projeto
+  - name: "node:20"
+    entrypoint: "npm"
+    args: ["install"]
+    id: "Install Dependencies"
 
-  # 3. Roda o build de produção para garantir que a aplicação compila
-  # Isso gera os arquivos estáticos na pasta 'dist/' ou 'build/', validando o código.
-  - name: 'node:20'
-    entrypoint: 'npm'
-    args: ['run', 'build']
-    id: 'Build Application'
+  # 2. Roda o build de produção para garantir que a aplicação compila
+  - name: "node:20"
+    entrypoint: "npm"
+    args: ["run", "build"]
+    id: "Build Application"
+    env:
+      - "NEXT_PUBLIC_ENVIRONMENT=CI_TEST"
+      - 'NEXT_PUBLIC_API_URL=https://ci-placeholder.agribit.com.br'
+      - 'NEXT_PUBLIC_APP_NAME=AgroGame CI'
 
 # A seção 'options' para garantir que os logs funcionem com a conta de serviço
 options:
   logging: CLOUD_LOGGING_ONLY
-
