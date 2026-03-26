@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:staging": "next dev --env .env.staging",
+    "dev:staging": "env-cmd -f .env.staging next dev",
     "build": "next build",
     "build:staging": "next build",
     "build:production": "next build",
@@ -27,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "env-cmd": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
