@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, ListTodo, FileCheck, Link2 } from 'lucide-react
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAdminPrivileges } from '@/lib/utils';
 
 const baseMenuItems = [
   { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
@@ -21,7 +22,8 @@ export default function Sidebar() {
   const { user } = useAuth();
   
   // Filter menu items based on user type
-  const isAdmin = user?.userType === 'Administrador';
+  // SuperAdmin and Administrador have access to all features
+  const isAdmin = hasAdminPrivileges(user?.userType);
   const menuItems = [...baseMenuItems, ...(isAdmin ? adminMenuItems : [])];
 
   return (
