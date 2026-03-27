@@ -7,6 +7,7 @@ import { FarmsTable } from '@/components/producers/FarmsTable';
 import { ProductionUnitsTable } from '@/components/producers/ProductionUnitsTable';
 import { WorkersTable } from '@/components/producers/WorkersTable';
 import { getUserInfo, listFarms, listProductionUnits, listWorkers } from '@/services/producers.service';
+import { getBadgeVariant } from '@/types/producer-status';
 
 export default async function ManageProducerPage({ 
   params,
@@ -73,17 +74,6 @@ export default async function ManageProducerPage({
     workersError = 'Erro ao carregar funcionários';
   }
 
-  type ProducerStatus = 'Ativo' | 'Inativo' | 'Pendente' | 'Aprovado' | 'Rejeitado' | 'Suspenso';
-
-  const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
-    'Ativo': 'enviado',
-    'Aprovado': 'enviado',
-    'Inativo': 'excluida',
-    'Rejeitado': 'excluida',
-    'Pendente': 'pendente',
-    'Suspenso': 'pendente',
-  };
-
   return (
     <div className="max-w-8xl mx-4 space-y-4 pt-14 pb-8">
       <div className="flex items-center justify-between gap-5 mb-6">
@@ -95,15 +85,15 @@ export default async function ManageProducerPage({
             <h1 className="text-2xl font-bold text-gray-900">
               Gerenciar produtores &gt; {userName}
             </h1>
-            <Badge variant={statusBadgeVariant[status as ProducerStatus]}>
+            <Badge variant={getBadgeVariant(status)}>
               {status}
             </Badge>
           </div>
         </div>
 
-        <div className="w-48 h-11">
+        {/* <div className="w-48 h-11">
           <ProducerDataFilter userId={userId} />
-        </div>
+        </div> */}
       </div>
 
       <ProducerDataForm userData={userData} error={userError} />
