@@ -91,9 +91,9 @@ export default async function ManageProducerPage({
           </div>
         </div>
 
-        <div className="w-48 h-11">
+        {/* <div className="w-48 h-11">
           <ProducerDataFilter userId={userId} />
-        </div>
+        </div> */}
       </div>
 
       <ProducerDataForm userData={userData} error={userError} />
