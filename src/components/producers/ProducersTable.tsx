@@ -8,16 +8,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
 import { useState } from 'react';
-import { ProducerStatusDisplay, ProducerStatusCode } from '@/types/producer-status';
+import { StatusDisplay, StatusCode, getBadgeVariant } from '@/types/producer-status';
 
-export type ProducerStatus = ProducerStatusDisplay;
+export type ProducerStatus = StatusDisplay;
 
 export interface Producer {
   userId: number;
   name: string;
   cpf: string;
   status: ProducerStatus;
-  statusCode: ProducerStatusCode;
+  statusCode: StatusCode;
   createdAt: string;
 }
 
@@ -29,14 +29,7 @@ interface ProducersTableProps {
   totalPages: number;
 }
 
-const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
-  'Aprovado': 'enviado',
-  'Ativo': 'enviado',
-  'Pendente': 'pendente',
-  'Rejeitado': 'excluida',
-  'Inativo': 'excluida',
-  'Suspenso': 'pendente',
-};
+
 
 export function ProducersTable({
   producers,
@@ -135,7 +128,7 @@ export function ProducersTable({
                 {maskCpf(producer.cpf)}
               </TableCell>
               <TableCell>
-                <Badge variant={statusBadgeVariant[producer.status]}>
+                <Badge variant={getBadgeVariant(producer.status)}>
                   {producer.status}
                 </Badge>
               </TableCell>

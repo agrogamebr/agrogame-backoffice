@@ -5,7 +5,7 @@ export interface ProducerResponse {
   fullName: string;
   cpf: string | null;
   statusId: number;
-  statusName: string;
+  statusCode: string;
   createdAt: string;
 }
 
@@ -104,7 +104,7 @@ export interface ProducerLinkResponse {
   fullName: string;
   cpf: string | null;
   statusId: number;
-  statusName: string;
+  statusCode: string;
   createdAt: string;
   approvalDate?: string | null;
   approvedBy?: string | null;
