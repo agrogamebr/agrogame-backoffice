@@ -1,14 +1,16 @@
 'use client';
 
-import { LayoutDashboard, Users, ListTodo, FileCheck, X, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, FileCheck, X, Menu, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from './ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAdminPrivileges } from '@/lib/utils';
 
 const baseMenuItems = [
   { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
   { icon: Users, href: '/users', label: 'Usuários' },
+  { icon: Link2, href: '/vinculos', label: 'Vínculos' },
   { icon: ListTodo, href: '/activities', label: 'Atividades' },
 ];
 
@@ -40,7 +42,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { user } = useAuth();
   
   // Filter menu items based on user type
-  const isAdmin = user?.userType === 'Administrador';
+  // SuperAdmin and Administrador have access to all features
+  const isAdmin = hasAdminPrivileges(user?.userType);
   const menuItems = [...baseMenuItems, ...(isAdmin ? adminMenuItems : [])];
 
   return (

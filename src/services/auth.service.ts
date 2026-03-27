@@ -11,7 +11,7 @@ export interface User {
   userId: number;
   email: string;
   name: string;
-  userType: string;
+  userType: string; // Tipos: 'SuperAdmin' | 'Administrador' | outros
 }
 
 export interface LoginResponse extends User {
