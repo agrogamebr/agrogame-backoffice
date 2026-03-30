@@ -8,13 +8,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { proccessProducerLinkAction } from '@/app/actions/producer-links';
 import { useToast } from '@/components/ui/Toast';
+import { getDisplayFromId, getBadgeVariant, isPending, isApproved, isRejected } from '@/types/producer-status';
 
 export interface ProducerLink {
   userId: number;
   fullName: string;
   cpf: string | null;
   statusId: number;
-  statusName: string;
+  statusCode: string;
   createdAt: string;
   approvedAt?: string | null;
   approvedByName?: string | null;
@@ -29,12 +30,7 @@ interface ProducerLinksTableProps {
   totalPages: number;
 }
 
-const statusBadgeVariant: Record<string, "enviado" | "pendente" | "excluida"> = {
-  'Aprovado': 'enviado',
-  'Pendente': 'pendente',
-  'Reprovado': 'excluida',
-  'Rejeitado': 'excluida',
-};
+
 
 export function ProducerLinksTable({ 
   links, 
@@ -133,23 +129,24 @@ export function ProducerLinksTable({
         </TableHeader>
         <TableBody>
           {links.map((link) => {
-            const isPending = link.statusName === 'Pendente';
-            const isApproved = link.statusName === 'Aprovado';
-            const isRejected = link.statusName === 'Reprovado' || link.statusName === 'Rejeitado';
+            const statusDisplay = getDisplayFromId(link.statusId);
+            const linkIsPending = isPending(link.statusId);
+            const linkIsApproved = isApproved(link.statusId);
+            const linkIsRejected = isRejected(link.statusId);
             
             return (
               <TableRow key={link.userId}>
                 <TableCell>
-                  <Badge variant={statusBadgeVariant[link.statusName] || 'pendente'}>
-                    {link.statusName}
+                  <Badge variant={getBadgeVariant(statusDisplay)}>
+                    {statusDisplay}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">{link.fullName}</TableCell>
                 <TableCell>
-                  {isApproved || isRejected ? formatDate(link.approvedAt) : '-'}
+                  {linkIsApproved || linkIsRejected ? formatDate(link.approvedAt) : '-'}
                 </TableCell>
                 <TableCell>
-                  {isApproved || isRejected ? (link.approvedByName || '-') : '-'}
+                  {linkIsApproved || linkIsRejected ? (link.approvedByName || '-') : '-'}
                 </TableCell>
                 {/* <TableCell>
                   {isRejected && link.rejectionReason ? (
@@ -162,7 +159,7 @@ export function ProducerLinksTable({
                   )}
                 </TableCell> */}
                 <TableCell className="text-right">
-                  {isPending ? (
+                  {linkIsPending ? (
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"

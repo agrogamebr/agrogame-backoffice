@@ -3,7 +3,7 @@ import { EmptyState } from '@/components/activities/EmptyState';
 import { ProducersTable, Producer } from '@/components/producers/ProducersTable';
 import { listProducers } from '@/services/producers.service';
 import { redirect } from 'next/navigation';
-import { STATUS_DISPLAY, STATUS_ID_TO_CODE, ProducerStatusId } from '@/types/producer-status';
+import { getDisplayFromId, getCodeFromId } from '@/types/producer-status';
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ page?: string; size?: string; name?: string; cpf?: string; statusId?: string }> }) {
 
@@ -25,8 +25,8 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
     const producersResponse = await listProducers(page, size, filters);
 
     producers = producersResponse.content.map(p => {
-      const statusDisplay = STATUS_DISPLAY[p.statusId as ProducerStatusId] || 'Pendente';
-      const statusCode = STATUS_ID_TO_CODE[p.statusId as ProducerStatusId] || 'pending';
+      const statusDisplay = getDisplayFromId(p.statusId);
+      const statusCode = getCodeFromId(p.statusId);
       return {
         userId: p.userId,
         name: p.fullName,

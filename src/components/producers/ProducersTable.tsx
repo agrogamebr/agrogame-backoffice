@@ -8,16 +8,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
 import { useState } from 'react';
-import { ProducerStatusDisplay, ProducerStatusCode } from '@/types/producer-status';
+import { StatusDisplay, StatusCode, getBadgeVariant } from '@/types/producer-status';
 
-export type ProducerStatus = ProducerStatusDisplay;
+export type ProducerStatus = StatusDisplay;
 
 export interface Producer {
   userId: number;
   name: string;
   cpf: string;
   status: ProducerStatus;
-  statusCode: ProducerStatusCode;
+  statusCode: StatusCode;
   createdAt: string;
 }
 
@@ -29,14 +29,7 @@ interface ProducersTableProps {
   totalPages: number;
 }
 
-const statusBadgeVariant: Record<ProducerStatus, "enviado" | "pendente" | "excluida"> = {
-  'Aprovado': 'enviado',
-  'Ativo': 'enviado',
-  'Pendente': 'pendente',
-  'Rejeitado': 'excluida',
-  'Inativo': 'excluida',
-  'Suspenso': 'pendente',
-};
+
 
 export function ProducersTable({
   producers,
@@ -63,15 +56,14 @@ export function ProducersTable({
     router.push(`/users?${params.toString()}`);
   };
 
-  const handleViewProfile = (userId: number) => {
-    // TODO: Navigate to AGRO-241 when implemented
-    router.push(`/users/${userId}`);
-  };
-
   const handleManageProducer = (userId: number, userName: string, status: ProducerStatus) => {
     router.push(`/users/${userId}?name=${encodeURIComponent(userName)}&status=${status}`);
     setOpenMenuId(null);
     setMenuPosition(null);
+  };
+
+  const handleRowClick = (producer: Producer) => {
+    router.push(`/users/${producer.userId}?name=${encodeURIComponent(producer.name)}&status=${producer.status}`);
   };
 
   const handleViewPointsStatement = (userId: number, userName: string) => {
@@ -122,7 +114,7 @@ export function ProducersTable({
           {producers.map((producer) => (
             <TableRow 
               key={producer.userId}
-              onClick={() => handleViewProfile(producer.userId)}
+              onClick={() => handleRowClick(producer)}
               className="cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <TableCell>
@@ -135,7 +127,7 @@ export function ProducersTable({
                 {maskCpf(producer.cpf)}
               </TableCell>
               <TableCell>
-                <Badge variant={statusBadgeVariant[producer.status]}>
+                <Badge variant={getBadgeVariant(producer.status)}>
                   {producer.status}
                 </Badge>
               </TableCell>
