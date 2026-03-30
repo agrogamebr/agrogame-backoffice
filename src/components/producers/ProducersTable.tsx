@@ -56,15 +56,14 @@ export function ProducersTable({
     router.push(`/users?${params.toString()}`);
   };
 
-  const handleViewProfile = (userId: number) => {
-    // TODO: Navigate to AGRO-241 when implemented
-    router.push(`/users/${userId}`);
-  };
-
   const handleManageProducer = (userId: number, userName: string, status: ProducerStatus) => {
     router.push(`/users/${userId}?name=${encodeURIComponent(userName)}&status=${status}`);
     setOpenMenuId(null);
     setMenuPosition(null);
+  };
+
+  const handleRowClick = (producer: Producer) => {
+    router.push(`/users/${producer.userId}?name=${encodeURIComponent(producer.name)}&status=${producer.status}`);
   };
 
   const handleViewPointsStatement = (userId: number, userName: string) => {
@@ -115,7 +114,7 @@ export function ProducersTable({
           {producers.map((producer) => (
             <TableRow 
               key={producer.userId}
-              onClick={() => handleViewProfile(producer.userId)}
+              onClick={() => handleRowClick(producer)}
               className="cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <TableCell>
