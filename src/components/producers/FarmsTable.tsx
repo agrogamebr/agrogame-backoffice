@@ -101,7 +101,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
           <TableRow>
             <TableHead className="w-[12%]">STATUS</TableHead>
             <TableHead className="w-[25%]">NOME DA FAZENDA</TableHead>
-            <TableHead className="w-[28%]">CULTURAS</TableHead>
+            <TableHead className="w-[28%]">ATIVIDADES AGROPECUÁRIAS</TableHead>
             <TableHead className="w-[15%]">MUNICÍPIO</TableHead>
             <TableHead className="w-[10%]">UF</TableHead>
             {/* <TableHead className="w-[10%] text-center">AÇÕES</TableHead> */}

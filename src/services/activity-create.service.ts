@@ -32,7 +32,7 @@ export async function listCropTypes(): Promise<CropTypeResponse[]> {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao carregar culturas') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao carregar atividades agropecuárias') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }

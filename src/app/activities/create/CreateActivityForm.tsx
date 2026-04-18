@@ -393,12 +393,12 @@ export function CreateActivityForm({
           </div>
         </SectionCard>
 
-        <SectionCard title="Informações de cultura, fazendas e unidade produtiva">
+        <SectionCard title="Informações de atividade agropecuária, fazendas e unidade produtiva">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_1fr_220px] gap-6">
             <div>
               <SelectableCheckboxList
-                title="Cultura"
-                filterPlaceholder="Filtrar cultura"
+                title="Atividades Agropecuárias"
+                filterPlaceholder="Filtrar atividades agropecuárias"
                 items={cropTypes}
                 inputName="cropTypeIds"
                 defaultSelectedIds={selectedCropTypeIds}
