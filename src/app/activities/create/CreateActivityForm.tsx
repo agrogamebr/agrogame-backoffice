@@ -182,7 +182,7 @@ export function CreateActivityForm({
         
         // Erro sem mensagem - retornar erro genérico
         return {
-          errors: { general: 'Erro ao enviar atividade. Por favor, tente novamente.' },
+          errors: { general: 'Erro ao enviar ação. Por favor, tente novamente.' },
           isValidationError: false,
           previousValues,
         };
@@ -289,7 +289,7 @@ export function CreateActivityForm({
     }
   };
 
-  const pageTitle = isEditing ? 'Editar atividade' : 'Criar atividade';
+  const pageTitle = isViewMode ? 'Visualizar ação' : isEditing ? 'Editar ação' : 'Criar ação';
   const statusBadge = isEditing && initialActivity ? getStatusBadge(initialActivity.status) : null;
 
   // Set up default values for form fields
@@ -304,12 +304,12 @@ export function CreateActivityForm({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Link href="/activities" className="font-semibold text-gray-700 hover:text-[#0B63E5] cursor-pointer">
-            Gerenciamento de atividades
+            Gerenciamento de ações
           </Link>
           <span className="text-gray-400">&gt;</span>
           <span className="font-extrabold text-gray-900">{pageTitle}</span>
         </div>
-        {/* <h1 className="text-2xl font-bold text-gray-900">{isViewMode ? 'Visualizar atividade' : pageTitle}</h1> */}
+        {/* <h1 className="text-2xl font-bold text-gray-900">{isViewMode ? 'Visualizar ação' : pageTitle}</h1> */}
       </div>
 
       <ErrorAlert errors={errors || null} />
@@ -320,7 +320,7 @@ export function CreateActivityForm({
         )}
 
         <SectionCard 
-          title="Informações da atividade"
+          title="Informações da ação"
           rightContent={statusBadge ? (
             <Badge variant={statusBadge.variant}>
               {statusBadge.label}
@@ -329,7 +329,7 @@ export function CreateActivityForm({
         >
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1.2fr_180px] gap-6 items-start">
             <ActivityImageUpload
-              label="Imagem da atividade"
+              label="Imagem da ação"
               helperText="A imagem deve ser em png 180x180px"
               name="activityImage"
               initialImageGsUri={initialActivity?.thumbnailGsutilUri}
@@ -340,7 +340,7 @@ export function CreateActivityForm({
               id="activity-name"
               label={
                 <span>
-                  Nome da atividade <RequiredIndicator />
+                  Nome da ação <RequiredIndicator />
                 </span>
               }
               placeholder="Desmatamento - Corte Raso"
@@ -353,13 +353,13 @@ export function CreateActivityForm({
 
             <div className="space-y-2">
               <label htmlFor="activity-description" className="block text-sm font-medium text-gray-700">
-                Descrição da atividade <RequiredIndicator />
+                Descrição da ação <RequiredIndicator />
               </label>
               <textarea
                 id="activity-description"
                 name="activityDescription"
                 rows={4}
-                placeholder="Descreva a atividade"
+                placeholder="Descreva a ação"
                 defaultValue={defaultDescription}
                 required
                 disabled={isViewMode}
@@ -498,7 +498,7 @@ export function CreateActivityForm({
                 variant="primary"
                 className="px-6 py-2.5 rounded-lg border-2 border-[#0B63E5] bg-[#0B63E5] text-white font-semibold hover:bg-[#0951bd] sm:min-w-55"
               >
-                {isPendingSend ? 'Salvando...' : 'Salvar e enviar atividade'}
+                {isPendingSend ? 'Salvando...' : 'Salvar e enviar ação'}
               </Button>
             </>
           )}

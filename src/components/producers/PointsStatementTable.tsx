@@ -84,7 +84,7 @@ export function PointsStatementTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[15%]">TIPO DE OPERAÇÃO</TableHead>
-            <TableHead className="w-[25%]">NOME DA ATIVIDADE</TableHead>
+            <TableHead className="w-[25%]">NOME DA AÇÃO</TableHead>
             <TableHead className="w-[20%]">FAZENDA</TableHead>
             <TableHead className="w-[20%]">UNIDADE DE PRODUÇÃO</TableHead>
             <TableHead className="w-[20%] text-right">PONTOS</TableHead>

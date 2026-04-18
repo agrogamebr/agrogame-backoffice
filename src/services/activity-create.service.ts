@@ -301,7 +301,7 @@ export async function sendActivity(activityId: number): Promise<void> {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao enviar atividade') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao enviar ação') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
@@ -371,7 +371,7 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao criar atividade') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao criar ação') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
@@ -380,7 +380,7 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
   const activityId = responseData.id || responseData.activityId;
 
   if (!activityId) {
-    throw new Error('ID da atividade não foi retornado pela API');
+    throw new Error('ID da ação não foi retornado pela API');
   }
 
   // Upload thumbnail separately if present
@@ -412,7 +412,7 @@ export async function getActivityById(activityId: number): Promise<ActivityDetai
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao buscar atividade') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao buscar ação') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
@@ -477,7 +477,7 @@ export async function updateActivity(activityId: number, data: UpdateActivityReq
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao atualizar atividade') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao atualizar ação') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }

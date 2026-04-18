@@ -74,7 +74,7 @@ export function ActivityImageUpload({
             <div className="relative w-full aspect-square max-w-45 mx-auto overflow-hidden rounded-lg bg-white">
               <Image
                 src={previewUrl}
-                alt="Preview da atividade"
+                alt="Preview da ação"
                 fill
                 unoptimized={previewUrl.startsWith('/api/')}
                 className="object-cover"
