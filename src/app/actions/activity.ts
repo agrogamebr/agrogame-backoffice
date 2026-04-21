@@ -30,7 +30,7 @@ export async function cancelActivity(activityId: number | string): Promise<void>
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao cancelar atividade') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao cancelar ação') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }
@@ -66,7 +66,7 @@ export async function saveAndSendActivity(formData: FormData) {
 export async function saveActivityDraftEdit(formData: FormData) {
   const activityId = formData.get('activityId') as string;
   if (!activityId) {
-    throw new Error('ID da atividade não fornecido');
+    throw new Error('ID da ação não fornecido');
   }
   formData.set('sendNow', 'false');
   await updateActivityFromForm(parseInt(activityId, 10), formData);
@@ -75,7 +75,7 @@ export async function saveActivityDraftEdit(formData: FormData) {
 export async function saveAndSendActivityEdit(formData: FormData) {
   const activityId = formData.get('activityId') as string;
   if (!activityId) {
-    throw new Error('ID da atividade não fornecido');
+    throw new Error('ID da ação não fornecido');
   }
   formData.set('sendNow', 'true');
   await updateActivityFromForm(parseInt(activityId, 10), formData);
@@ -210,7 +210,7 @@ async function createActivityFromForm(formData: FormData) {
       sendNow,
     });
 
-    redirect('/activities?success=Atividade criada com sucesso');
+    redirect('/activities?success=Ação criada com sucesso');
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number; isValidationError?: boolean };
 
@@ -288,7 +288,7 @@ async function updateActivityFromForm(activityId: number, formData: FormData) {
       sendNow,
     }, sendNow);
 
-    redirect('/activities?success=Atividade atualizada com sucesso');
+    redirect('/activities?success=Ação atualizada com sucesso');
   } catch (e: unknown) {
     const error = e as { message?: string; status?: number; isValidationError?: boolean };
 

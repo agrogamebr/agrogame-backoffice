@@ -110,11 +110,11 @@ export function ActivitiesTable({
         await sendActivity(activityToSend.id);
         setIsConfirmSendOpen(false);
         setActivityToSend(null);
-        addToast('Atividade enviada com sucesso', 'success', 5000);
+        addToast('Ação enviada com sucesso', 'success', 5000);
         router.refresh();
       } catch (error) {
         console.error('Failed to send activity', error);
-        const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar atividade';
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar ação';
         setIsConfirmSendOpen(false);
         setActivityToSend(null);
         addToast(errorMessage, 'error', 5000);
@@ -149,7 +149,7 @@ export function ActivitiesTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-30">STATUS</TableHead>
-            <TableHead>NOME DA ATIVIDADE</TableHead>
+            <TableHead>NOME DA AÇÃO</TableHead>
             <TableHead className="w-25 text-center">PONTOS</TableHead>
             <TableHead className="w-32.5">DATA DA CRIAÇÃO</TableHead>
             <TableHead className="w-25 text-center">AÇÕES</TableHead>
@@ -246,8 +246,8 @@ export function ActivitiesTable({
 
       <ConfirmModal
         isOpen={isConfirmOpen}
-        title="Cancelar atividade"
-        description={activityToCancel ? `Deseja cancelar a atividade "${activityToCancel.name}"?` : 'Deseja cancelar esta atividade?'}
+        title="Cancelar a ação"
+        description={activityToCancel ? `Deseja cancelar a ação "${activityToCancel.name}"?` : 'Deseja cancelar esta ação?'}
         confirmLabel="Sim"
         cancelLabel="Não"
         isConfirming={isCancelling}
@@ -262,11 +262,11 @@ export function ActivitiesTable({
 
       <ConfirmModal
         isOpen={isConfirmSendOpen}
-        title="Enviar atividade"
+        title="Enviar ação"
         description={
           activityToSend 
-            ? `Deseja enviar a atividade "${activityToSend.name}"? Após o envio, a atividade não poderá mais ser modificada. Tem certeza?`
-            : 'Deseja enviar esta atividade? Após o envio, a atividade não poderá mais ser modificada. Tem certeza?'
+            ? `Deseja enviar a ação "${activityToSend.name}"? Após o envio, a ação não poderá mais ser modificada. Tem certeza?`
+            : 'Deseja enviar esta ação? Após o envio, a ação não poderá mais ser modificada. Tem certeza?'
         }
         confirmLabel="Sim, enviar"
         cancelLabel="Cancelar"

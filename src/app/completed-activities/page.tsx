@@ -44,7 +44,7 @@ export default async function CompletedActivitiesPage({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Atividades Realizadas
+            Ações Realizadas
           </h1>
         </div>
       </div>
@@ -61,8 +61,8 @@ export default async function CompletedActivitiesPage({
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">
             <EmptyState
-              title="Sem atividades realizadas"
-              description="Nenhuma atividade aguardando aprovação"
+              title="Sem ações realizadas"
+              description="Nenhuma ação aguardando aprovação"
             />
           </div>
         )}

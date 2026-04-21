@@ -36,7 +36,7 @@ export function Pagination({
   };
 
   const handleNext = () => {
-    // Segurança: não permite avançar se não há atividades na página atual
+    // Segurança: não permite avançar se não há ações  na página atual
     // ou se já está na última página
     if (hasActivitiesOnPage && currentPage < totalPages - 1) {
       onPageChange(currentPage + 1);
