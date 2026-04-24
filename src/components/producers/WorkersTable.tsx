@@ -16,7 +16,6 @@ export interface Worker {
 
 interface WorkersTableProps {
   workers: Worker[];
-  userId: string;
   currentPage: number;
   pageSize: number;
   totalElements: number;
@@ -25,7 +24,6 @@ interface WorkersTableProps {
 
 export function WorkersTable({ 
   workers, 
-  userId, 
   currentPage, 
   pageSize, 
   totalElements, 
@@ -39,14 +37,14 @@ export function WorkersTable({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('workersPage', page.toString());
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('workersSize', size.toString());
     params.set('workersPage', '0');
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handleViewWorker = (workerId: number) => {
