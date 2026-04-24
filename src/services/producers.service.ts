@@ -33,6 +33,7 @@ export interface UserInfoResponse {
   zipCode: string | null;
   city: string | null;
   state: string | null;
+  thumbnail_gs_url: string | null;
 }
 
 export interface FarmResponse {

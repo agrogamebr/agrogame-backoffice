@@ -1,7 +1,7 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, UserCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/Badge';
-import { ProducerDataFilter } from '@/components/producers/ProducerDataFilter';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
 import { ProductionUnitsTable } from '@/components/producers/ProductionUnitsTable';
@@ -47,6 +47,10 @@ export default async function ManageProducerPage({
     userError = 'Erro ao carregar informações do produtor';
   }
 
+  const thumbnailUrl = userData?.thumbnail_gs_url
+    ? `/api/files/proxy?url=${encodeURIComponent(userData.thumbnail_gs_url)}`
+    : null;
+
   let farmsData = null;
   let farmsError = null;
   try {
@@ -74,26 +78,42 @@ export default async function ManageProducerPage({
     workersError = 'Erro ao carregar funcionários';
   }
 
+  const displayName = userData?.fullName || userName;
+
   return (
     <div className="max-w-8xl mx-4 space-y-4 pt-14 pb-8">
-      <div className="flex items-center justify-between gap-5 mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/users" className="text-gray-600 hover:text-gray-900 cursor-pointer">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Gerenciar produtores &gt; {userName}
-            </h1>
-            <Badge variant={getBadgeVariant(status)}>
-              {status}
-            </Badge>
-          </div>
-        </div>
+      <div className="flex items-center gap-4 mb-2">
+        <Link href="/users" className="text-gray-600 hover:text-gray-900 cursor-pointer">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Gerenciar produtores
+        </h1>
+      </div>
 
-        {/* <div className="w-48 h-11">
-          <ProducerDataFilter userId={userId} />
-        </div> */}
+      {/* Profile Header */}
+      <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm px-4 sm:px-8 pb-6 pt-10 flex items-center gap-4 mt-10">
+        <div className="shrink-0 absolute -top-10 left-4 sm:left-8">
+          {thumbnailUrl ? (
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
+              <Image
+                src={thumbnailUrl}
+                alt={displayName}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gray-100 flex items-center justify-center border-4 border-white shadow-md">
+              <UserCircle className="w-20 h-20 sm:w-24 sm:h-24 text-gray-400" />
+            </div>
+          )}
+        </div>
+        <div className="pl-32 sm:pl-40 space-y-1 min-w-0">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 truncate">{displayName}</h2>
+          <Badge variant={getBadgeVariant(status)}>{status}</Badge>
+        </div>
       </div>
 
       <ProducerDataForm userData={userData} error={userError} />
