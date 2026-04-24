@@ -1,6 +1,7 @@
 import { ArrowLeft, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { redirect } from 'next/navigation';
 import { Badge } from '@/components/ui/Badge';
 import { ProducerDataForm } from '@/components/producers/ProducerDataForm';
 import { FarmsTable } from '@/components/producers/FarmsTable';
@@ -8,29 +9,31 @@ import { ProductionUnitsTable } from '@/components/producers/ProductionUnitsTabl
 import { WorkersTable } from '@/components/producers/WorkersTable';
 import { getUserInfo, listFarms, listProductionUnits, listWorkers } from '@/services/producers.service';
 import { getBadgeVariant } from '@/types/producer-status';
+import { getSelectedProducer } from '@/lib/producer-cookie';
 
-export default async function ManageProducerPage({ 
-  params,
-  searchParams 
-}: { 
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ 
-    name?: string;
-    status?: string;
+export default async function ManageProducerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
     farmsPage?: string;
     farmsSize?: string;
     unitsPage?: string;
     unitsSize?: string;
     workersPage?: string;
     workersSize?: string;
-  }>
+  }>;
 }) {
-  const resolvedParams = await params;
+  const producer = await getSelectedProducer();
+  if (!producer) {
+    redirect('/users');
+  }
+
   const resolvedSearchParams = await searchParams;
-  
-  const userId = resolvedParams.id;
-  const userName = resolvedSearchParams.name || 'Usuário';
-  const status = resolvedSearchParams.status || 'Ativo';
+
+  const userId = producer.userId;
+  const userName = producer.name;
+  const status = producer.status;
+
   const farmsPage = parseInt(resolvedSearchParams.farmsPage || '0', 10);
   const farmsSize = parseInt(resolvedSearchParams.farmsSize || '5', 10);
   const unitsPage = parseInt(resolvedSearchParams.unitsPage || '0', 10);
@@ -125,9 +128,8 @@ export default async function ManageProducerPage({
             <p className="text-center text-red-600">{farmsError}</p>
           </div>
         ) : (
-          <FarmsTable 
+          <FarmsTable
             farms={farmsData?.content || []}
-            userId={userId}
             currentPage={farmsPage}
             pageSize={farmsSize}
             totalElements={farmsData?.totalElements || 0}
@@ -143,9 +145,8 @@ export default async function ManageProducerPage({
             <p className="text-center text-red-600">{productionUnitsError}</p>
           </div>
         ) : (
-          <ProductionUnitsTable 
+          <ProductionUnitsTable
             productionUnits={productionUnitsData?.content || []}
-            userId={userId}
             currentPage={unitsPage}
             pageSize={unitsSize}
             totalElements={productionUnitsData?.totalElements || 0}
@@ -161,9 +162,8 @@ export default async function ManageProducerPage({
             <p className="text-center text-red-600">{workersError}</p>
           </div>
         ) : (
-          <WorkersTable 
+          <WorkersTable
             workers={workersData?.content || []}
-            userId={userId}
             currentPage={workersPage}
             pageSize={workersSize}
             totalElements={workersData?.totalElements || 0}

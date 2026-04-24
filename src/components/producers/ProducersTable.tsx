@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { maskCpf } from '@/lib/utils';
 import { useState } from 'react';
 import { StatusDisplay, StatusCode, getBadgeVariant } from '@/types/producer-status';
+import { selectProducerAction, selectProducerForExtratoAction } from '@/actions/selected-producer';
 
 export type ProducerStatus = StatusDisplay;
 
@@ -56,20 +57,20 @@ export function ProducersTable({
     router.push(`/users?${params.toString()}`);
   };
 
-  const handleManageProducer = (userId: number, userName: string, status: ProducerStatus) => {
-    router.push(`/users/${userId}?name=${encodeURIComponent(userName)}&status=${status}`);
+  const handleManageProducer = async (userId: number, userName: string, status: ProducerStatus) => {
     setOpenMenuId(null);
     setMenuPosition(null);
+    await selectProducerAction(String(userId), userName, status);
   };
 
-  const handleRowClick = (producer: Producer) => {
-    router.push(`/users/${producer.userId}?name=${encodeURIComponent(producer.name)}&status=${producer.status}`);
+  const handleRowClick = async (producer: Producer) => {
+    await selectProducerAction(String(producer.userId), producer.name, producer.status);
   };
 
-  const handleViewPointsStatement = (userId: number, userName: string) => {
-    router.push(`/users/${userId}/extrato?name=${encodeURIComponent(userName)}`);
+  const handleViewPointsStatement = async (userId: number, userName: string, status: ProducerStatus) => {
     setOpenMenuId(null);
     setMenuPosition(null);
+    await selectProducerForExtratoAction(String(userId), userName, status);
   };
 
   const toggleMenu = (userId: number, e: React.MouseEvent) => {
@@ -176,7 +177,7 @@ export function ProducersTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleViewPointsStatement(producer.userId, producer.name);
+                              handleViewPointsStatement(producer.userId, producer.name, producer.status);
                             }}
                             className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors cursor-pointer"
                           >

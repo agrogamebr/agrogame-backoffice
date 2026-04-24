@@ -14,13 +14,11 @@ interface FilterOptions {
 }
 
 interface PointsStatementFilterProps {
-  userId: string;
   farms: { id: number; name: string }[];
   productionUnits: { id: number; name: string }[];
 }
 
 export function PointsStatementFilter({
-  userId,
   farms,
   productionUnits,
 }: PointsStatementFilterProps) {
@@ -57,7 +55,7 @@ export function PointsStatementFilter({
       }
     });
 
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/users/detail/extrato?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -80,7 +78,7 @@ export function PointsStatementFilter({
     params.delete('startDate');
     params.delete('endDate');
     params.set('page', '0');
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/users/detail/extrato?${params.toString()}`);
     setIsOpen(false);
   };
 

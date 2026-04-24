@@ -16,7 +16,6 @@ export interface ProductionUnit {
 
 interface ProductionUnitsTableProps {
   productionUnits: ProductionUnit[];
-  userId: string;
   currentPage: number;
   pageSize: number;
   totalElements: number;
@@ -25,7 +24,6 @@ interface ProductionUnitsTableProps {
 
 export function ProductionUnitsTable({ 
   productionUnits, 
-  userId, 
   currentPage, 
   pageSize, 
   totalElements, 
@@ -39,14 +37,14 @@ export function ProductionUnitsTable({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('unitsPage', page.toString());
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('unitsSize', size.toString());
     params.set('unitsPage', '0');
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handleViewProductionUnit = (unitId: number) => {
