@@ -10,11 +10,11 @@ const baseMenuItems = [
   { icon: LayoutDashboard, href: '/dashboard', label: 'Dashboard' },
   { icon: Users, href: '/users', label: 'Usuários' },
   { icon: Link2, href: '/vinculos', label: 'Vínculos' },
-  { icon: ListTodo, href: '/activities', label: 'Atividades' },
+  { icon: ListTodo, href: '/activities', label: 'Ações' },
 ];
 
 const adminMenuItems = [
-  { icon: FileCheck, href: '/completed-activities', label: 'Atividades Realizadas' },
+  { icon: FileCheck, href: '/completed-activities', label: 'Ações Realizadas' },
 ];
 
 export default function Sidebar() {

@@ -23,7 +23,6 @@ interface PointsStatementTableProps {
   pageSize: number;
   totalElements: number;
   totalPages: number;
-  userId: string;
 }
 
 export function PointsStatementTable({
@@ -32,7 +31,6 @@ export function PointsStatementTable({
   pageSize,
   totalElements,
   totalPages,
-  userId,
 }: PointsStatementTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,14 +38,14 @@ export function PointsStatementTable({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/users/detail/extrato?${params.toString()}`);
   };
 
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('size', size.toString());
     params.set('page', '0');
-    router.push(`/users/${userId}/extrato?${params.toString()}`);
+    router.push(`/users/detail/extrato?${params.toString()}`);
   };
 
   const getOperationTypeBadge = (operationType: string) => {
@@ -84,7 +82,7 @@ export function PointsStatementTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[15%]">TIPO DE OPERAÇÃO</TableHead>
-            <TableHead className="w-[25%]">NOME DA ATIVIDADE</TableHead>
+            <TableHead className="w-[25%]">NOME DA AÇÃO</TableHead>
             <TableHead className="w-[20%]">FAZENDA</TableHead>
             <TableHead className="w-[20%]">UNIDADE DE PRODUÇÃO</TableHead>
             <TableHead className="w-[20%] text-right">PONTOS</TableHead>

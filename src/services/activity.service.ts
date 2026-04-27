@@ -55,7 +55,7 @@ export async function listActivities(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || 'Erro ao listar atividades') as Error & { status?: number };
+    const error = new Error(errorData.message || 'Erro ao listar ações') as Error & { status?: number };
     error.status = response.status;
     throw error;
   }

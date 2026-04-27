@@ -20,7 +20,6 @@ export interface Farm {
 
 interface FarmsTableProps {
   farms: Farm[];
-  userId: string;
   currentPage: number;
   pageSize: number;
   totalElements: number;
@@ -33,7 +32,7 @@ const statusBadgeVariant: Record<string, "enviado" | "pendente" | "excluida"> = 
   'PENDENTE': 'pendente',
 };
 
-export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements, totalPages }: FarmsTableProps) {
+export function FarmsTable({ farms, currentPage, pageSize, totalElements, totalPages }: FarmsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -42,14 +41,14 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('farmsPage', page.toString());
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handlePageSizeChange = (size: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('farmsSize', size.toString());
     params.set('farmsPage', '0');
-    router.push(`/users/${userId}?${params.toString()}`);
+    router.push(`/users/detail?${params.toString()}`);
   };
 
   const handleViewFarm = (farmId: number) => {
@@ -101,7 +100,7 @@ export function FarmsTable({ farms, userId, currentPage, pageSize, totalElements
           <TableRow>
             <TableHead className="w-[12%]">STATUS</TableHead>
             <TableHead className="w-[25%]">NOME DA FAZENDA</TableHead>
-            <TableHead className="w-[28%]">CULTURAS</TableHead>
+            <TableHead className="w-[28%]">ATIVIDADES AGROPECUÁRIAS</TableHead>
             <TableHead className="w-[15%]">MUNICÍPIO</TableHead>
             <TableHead className="w-[10%]">UF</TableHead>
             {/* <TableHead className="w-[10%] text-center">AÇÕES</TableHead> */}

@@ -11,7 +11,7 @@ export function EmptyState({ title, description }: EmptyStateProps) {
       <div className="mb-6 relative">
         <Image
           src="/emptyState.svg"
-          alt="Sem atividades"
+          alt="Sem ações"
           width={250}
           height={200}
           className="w-auto h-auto"

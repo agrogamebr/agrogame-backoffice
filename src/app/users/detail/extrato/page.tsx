@@ -1,40 +1,43 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { PointsStatementTable } from '@/components/producers/PointsStatementTable';
 import { PointsStatementFilter } from '@/components/producers/PointsStatementFilter';
 import { getPointsStatement, PointsStatementItem } from '@/services/points-statement.service';
 import { listFarms, listProductionUnitsBackoffice } from '@/services/activity-create.service';
-import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/activities/EmptyState';
+import { getSelectedProducer } from '@/lib/producer-cookie';
 
-export default async function PointsStatementPage({ 
-  params,
-  searchParams 
-}: { 
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ 
-    page?: string; 
-    size?: string; 
-    name?: string;
+export default async function PointsStatementPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+    size?: string;
     farmId?: string;
     productionUnitId?: string;
     operationType?: string;
     startDate?: string;
     endDate?: string;
-  }>
+  }>;
 }) {
-  const resolvedParams = await params;
+  const producer = await getSelectedProducer();
+  if (!producer) {
+    redirect('/users');
+  }
+
   const resolvedSearchParams = await searchParams;
-  
-  const userId = resolvedParams.id;
-  const userName = resolvedSearchParams.name || 'Usuário';
+
+  const userId = producer.userId;
+  const userName = producer.name;
   const page = Number(resolvedSearchParams.page) || 0;
   const size = Number(resolvedSearchParams.size) || 5;
 
-  // Extract filter parameters
   const filters = {
     farmId: resolvedSearchParams.farmId ? Number(resolvedSearchParams.farmId) : undefined,
-    productionUnitId: resolvedSearchParams.productionUnitId ? Number(resolvedSearchParams.productionUnitId) : undefined,
+    productionUnitId: resolvedSearchParams.productionUnitId
+      ? Number(resolvedSearchParams.productionUnitId)
+      : undefined,
     operationType: resolvedSearchParams.operationType,
     startDate: resolvedSearchParams.startDate,
     endDate: resolvedSearchParams.endDate,
@@ -54,15 +57,8 @@ export default async function PointsStatementPage({
       getPointsStatement(Number(userId), page, size, filters),
     ]);
 
-    farms = farmsResponse.map(f => ({
-      id: f.id,
-      name: f.name,
-    }));
-
-    productionUnits = productionUnitsResponse.map(pu => ({
-      id: pu.id,
-      name: pu.name,
-    }));
+    farms = farmsResponse.map((f) => ({ id: f.id, name: f.name }));
+    productionUnits = productionUnitsResponse.map((pu) => ({ id: pu.id, name: pu.name }));
 
     items = statementResponse.items;
     totalElements = statementResponse.totalElements;
@@ -70,7 +66,11 @@ export default async function PointsStatementPage({
     currentBalance = statementResponse.currentBalance;
   } catch (e: unknown) {
     const err = e as { message?: string; status?: number };
-    if (err.message === 'Token JWT ausente ou inválido' || err.message === 'Unauthorized' || err.status === 401) {
+    if (
+      err.message === 'Token JWT ausente ou inválido' ||
+      err.message === 'Unauthorized' ||
+      err.status === 401
+    ) {
       redirect(`/api/auth/logout?error=${encodeURIComponent(err.message || 'Erro desconhecido')}`);
     }
     console.error(err);
@@ -91,17 +91,18 @@ export default async function PointsStatementPage({
         </div>
 
         <div className="flex items-center gap-5">
-          <div className="w-[347px] h-12 bg-[#25A259] border border-[#25A259] rounded-2xl py-6 px-4 flex items-center justify-center gap-4 text-white" style={{ boxShadow: '1px 1px 4px 0px rgba(0, 0, 0, 0.2)' }}>
+          <div
+            className="w-[347px] h-12 bg-[#25A259] border border-[#25A259] rounded-2xl py-6 px-4 flex items-center justify-center gap-4 text-white"
+            style={{ boxShadow: '1px 1px 4px 0px rgba(0, 0, 0, 0.2)' }}
+          >
             <span className="text-sm font-medium whitespace-nowrap">Total de pontos acumulados</span>
-            <span className="text-xl font-bold whitespace-nowrap">{currentBalance.toLocaleString('pt-BR')} pts</span>
+            <span className="text-xl font-bold whitespace-nowrap">
+              {currentBalance.toLocaleString('pt-BR')} pts
+            </span>
           </div>
 
           <div className="w-48 h-11">
-            <PointsStatementFilter
-              userId={userId}
-              farms={farms}
-              productionUnits={productionUnits}
-            />
+            <PointsStatementFilter farms={farms} productionUnits={productionUnits} />
           </div>
         </div>
       </div>
@@ -114,7 +115,6 @@ export default async function PointsStatementPage({
             pageSize={size}
             totalElements={totalElements}
             totalPages={totalPages}
-            userId={userId}
           />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">

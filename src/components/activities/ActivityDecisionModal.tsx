@@ -112,7 +112,7 @@ export function ActivityDecisionModal({
 
           <div>
             <h3 className="text-sm font-normal text-gray-500 mb-2 leading-none tracking-[0.02em] font-sans">
-              Descrição da atividade
+              Descrição da ação
             </h3>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-700 leading-relaxed">
@@ -124,7 +124,7 @@ export function ActivityDecisionModal({
           {submission.files && submission.files.length > 0 && (
             <div>
               <h3 className="text-sm font-normal text-gray-500 mb-3 leading-none tracking-[0.02em] font-sans">
-                Registro de atividades do usuário
+                Registro de ações do usuário
               </h3>
               <div className="grid grid-cols-3 gap-3">
                 {submission.files.slice(0, 6).map((file) => (
@@ -168,7 +168,7 @@ export function ActivityDecisionModal({
                       )}
                     </div>
                   </div>
-                  <span className="text-sm text-gray-700">Aprovar atividade</span>
+                  <span className="text-sm text-gray-700">Aprovar ação</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative">
@@ -189,7 +189,7 @@ export function ActivityDecisionModal({
                       )}
                     </div>
                   </div>
-                  <span className="text-sm text-gray-700">Rejeitar atividade</span>
+                  <span className="text-sm text-gray-700">Rejeitar ação</span>
                 </label>
               </div>
             </div>

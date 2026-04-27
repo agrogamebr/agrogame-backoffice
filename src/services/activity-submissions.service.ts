@@ -46,7 +46,7 @@ export async function listActivitySubmissions(
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     const error = new Error(
-      errorData.message || 'Erro ao listar atividades realizadas'
+      errorData.message || 'Erro ao listar ações realizadas'
     ) as Error & { status?: number };
     error.status = response.status;
     throw error;

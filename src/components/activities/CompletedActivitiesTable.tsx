@@ -139,7 +139,7 @@ export function CompletedActivitiesTable({
           <TableHeader>
             <TableRow>
               <TableHead className="whitespace-nowrap">HISTÓRICO DE REVISÕES</TableHead>
-              <TableHead className="whitespace-nowrap">NOME DA ATIVIDADE</TableHead>
+              <TableHead className="whitespace-nowrap">NOME DA AÇÃO</TableHead>
               <TableHead className="whitespace-nowrap">NOME DO PRODUTOR</TableHead>
               <TableHead className="text-center whitespace-nowrap">PONTOS</TableHead>
               <TableHead className="whitespace-nowrap">STATUS</TableHead>

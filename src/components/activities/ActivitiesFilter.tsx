@@ -169,7 +169,7 @@ export function ActivitiesFilter({
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-100 z-50 p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Filtrar atividades</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Filtrar ações</h3>
             <Button
               onClick={() => setIsOpen(false)}
               variant="ghost"
@@ -201,14 +201,14 @@ export function ActivitiesFilter({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cultura
+                Atividades Agropecuárias
               </label>
               <select
                 value={filters.cropTypeId}
                 onChange={(e) => handleFilterChange('cropTypeId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B63E5] focus:border-transparent bg-white text-gray-900"
               >
-                <option value="">Todas as culturas</option>
+                <option value="">Todas as atividades agropecuárias</option>
                 {cropTypes.map((ct) => (
                   <option key={ct.id} value={ct.id}>
                     {ct.name}

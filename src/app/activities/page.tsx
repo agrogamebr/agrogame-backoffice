@@ -89,7 +89,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
       <ActivitiesToastHandler />
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
         <h1 className="w-92 h-11 text-2xl font-bold text-gray-900 flex items-center">
-          Gerenciamento de atividades
+          Gerenciamento de ações
         </h1>
 
         <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
             href="/activities/create"
             className="w-56 h-11 bg-[#0B63E5] hover:bg-[#0951bd] text-white gap-3 rounded-sm p-3 text-sm font-medium inline-flex items-center justify-center cursor-pointer"
           >
-            Cadastrar nova atividade
+            Cadastrar nova ação
           </Link>
 
           <div className="w-48 h-11">
@@ -122,8 +122,8 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center p-8">
             <EmptyState
-              title="Sem atividades"
-              description="Você ainda não tem nenhuma atividade cadastrada"
+              title="Sem ações cadastradas"
+              description="Você ainda não tem nenhuma ação cadastrada"
             />
           </div>
         )}

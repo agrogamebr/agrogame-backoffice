@@ -51,7 +51,7 @@ export async function submitDecisionAction(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        errorData.message || 'Erro ao enviar decisão da atividade'
+        errorData.message || 'Erro ao enviar decisão da ação'
       );
     }
 
@@ -76,7 +76,7 @@ export async function getActivityDetailsAction(userActivityId: number) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        errorData.message || 'Erro ao buscar detalhes da atividade'
+        errorData.message || 'Erro ao buscar detalhes da ação'
       );
     }
 
